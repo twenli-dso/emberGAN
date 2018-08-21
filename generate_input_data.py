@@ -46,4 +46,4 @@ xmal = x[np.where(y==1)]
 ymal = y[np.where(y==1)]
 xben = x[np.where(y==0)]
 yben = y[np.where(y==0)]
-np.savez('data_ember.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
+np.savez('./data/data_ember.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
