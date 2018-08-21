@@ -32,7 +32,7 @@ for filepath in filepaths:
 
             #print(apistats_dict)
 
-            with open('%s.json' %(sha256), 'w') as outfile:
+            with open('ember_apistats/%s.json' %(sha256), 'w') as outfile:
                 json.dump(apistats_dict, outfile)
 
             #if line_num == 5:
