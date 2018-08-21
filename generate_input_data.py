@@ -7,7 +7,7 @@ select_number = 128
 
 apis = []
 fs = glob.glob(os.path.join(apistats_dir, '*.json'))
-fs = fs[:100]
+fs = fs[:2048]
 for f in fs:
     with open(f, 'r') as jsonfile:
         data = json.load(jsonfile)
