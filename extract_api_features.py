@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-data_dir = "../ember_dataset/"
+data_dir = "../../ember_dataset/"
 
 #emberdf = ember.create_metadata(data_dir)
 emberdf = ember.read_metadata(data_dir)
