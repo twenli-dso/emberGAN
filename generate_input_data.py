@@ -6,7 +6,8 @@ apistats_dir = './ember_apistats'
 select_number = 128
 
 apis = []
-fs = glob.glob(os.path.join(apistats_dir, '0*.json'))
+fs = glob.glob(os.path.join(apistats_dir, '*.json'))
+fs = fs[:100]
 for f in fs:
     with open(f, 'r') as jsonfile:
         data = json.load(jsonfile)
