@@ -7,7 +7,7 @@ select_number = 128
 
 apis = []
 fs = glob.glob(os.path.join(apistats_dir, '*.json'))
-fs = fs[:2048]
+#fs = fs[:2048]
 for f in fs:
     with open(f, 'r') as jsonfile:
         data = json.load(jsonfile)
@@ -47,4 +47,4 @@ xmal = x[np.where(y==1)]
 ymal = y[np.where(y==1)]
 xben = x[np.where(y==0)]
 yben = y[np.where(y==0)]
-np.savez('./data/data_ember_2048.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
+np.savez('./data/data_ember_full.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
