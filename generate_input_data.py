@@ -10,7 +10,7 @@ fs = glob.glob(os.path.join(apistats_dir, '*.json'))
 #fs = fs[:2048]
 counter = 1
 for f in fs:
-    if counter % 100000 == 0:
+    if counter % 1000 == 0:
         print("reading file",counter)
     with open(f, 'r') as jsonfile:
         data = json.load(jsonfile)
@@ -29,7 +29,7 @@ for i in range(n_features):
 x = np.zeros((n_samples, n_features))
 y = np.zeros((n_samples, ))
 for i in range(n_samples):
-    if i % 100000 == 0:
+    if i % 1000 == 0:
         print("getting class of file",i)
     with open(fs[i], 'r') as jsonfile:
         data = json.load(jsonfile)
