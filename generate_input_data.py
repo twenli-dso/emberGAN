@@ -8,13 +8,17 @@ select_number = 128
 apis = []
 fs = glob.glob(os.path.join(apistats_dir, '*.json'))
 #fs = fs[:2048]
+counter = 1
 for f in fs:
+    if counter % 100000 == 0:
+        print("reading file",counter)
     with open(f, 'r') as jsonfile:
         data = json.load(jsonfile)
         capis = data['apistats']
         for api in capis.keys():
             if api not in apis:
                 apis.append(api)
+    counter += 1
 
 n_samples = len(fs)
 n_features = len(apis)
@@ -25,6 +29,8 @@ for i in range(n_features):
 x = np.zeros((n_samples, n_features))
 y = np.zeros((n_samples, ))
 for i in range(n_samples):
+    if i % 100000 == 0:
+        print("getting class of file",i)
     with open(fs[i], 'r') as jsonfile:
         data = json.load(jsonfile)
         capis = data['apistats']
@@ -34,6 +40,7 @@ for i in range(n_samples):
         for api in capis.keys():
             x[i, loc[api]] = 1
 
+print("getting important features")
 feat_labels = apis   #特征列名
 forest = RandomForestClassifier(n_estimators=2000, random_state=0, n_jobs=-1)  #2000棵树,并行工作数是运行服务器决定
 forest.fit(x, y)
