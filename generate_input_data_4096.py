@@ -7,7 +7,7 @@ select_number = 128
 
 apis = []
 fs = glob.glob(os.path.join(apistats_dir, '*.json'))
-fs = fs[:20480]
+fs = fs[:4096]
 counter = 1
 for f in fs:
     if counter % 1000 == 0:
@@ -54,4 +54,4 @@ xmal = x[np.where(y==1)]
 ymal = y[np.where(y==1)]
 xben = x[np.where(y==0)]
 yben = y[np.where(y==0)]
-np.savez('./data/data_ember_20480.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
+np.savez('./data/data_ember_4096.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
