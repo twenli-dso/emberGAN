@@ -3,8 +3,8 @@ from keras.models import load_model
 import pandas as pd
 
 modelpath = "../../ember_dataset/model.h5"
-file_data = "adversarial_ember_samples.jsonl"
-raw_feature_paths = ["adversarial_ember_samples.jsonl"]
+#file_data = "adversarial_ember_samples.jsonl"
+raw_feature_paths = ["adversarial_ember_samples_2.jsonl"]
 X_path = "X_adversarial_test.dat"
 y_path = "y_adversarial_test.dat"
 #df_path = "../../ember_dataset/df_scaled.pkl"
