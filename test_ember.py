@@ -9,7 +9,7 @@ def separate_by_feature(data):
         Separate data by feature group to feed multiple input model
         """
         extractor = PEFeatureExtractor()
-        dim = 128
+        dim = 256
         f_dict = {}
         end = 0
 
@@ -34,7 +34,7 @@ y_path = "y_adversarial_test.dat"
 #ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
 
 #load X and y from .dat files
-ndim = 128
+ndim = 256
 X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
