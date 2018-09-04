@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from features import PEFeatureExtractor
  
-def separate_by_feature(self, data):
+def separate_by_feature(data):
         """
         Separate data by feature group to feed multiple input model
         """
