@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 from features import PEFeatureExtractor
 from sklearn import preprocessing
+import multiprocessing
+
  
 #scale and separate dataset by feature group
 def scale_features(data_dir, X, y):
