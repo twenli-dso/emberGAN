@@ -2,7 +2,7 @@ import ember
 from keras.models import load_model
 import pandas as pd
 import numpy as np
-from ../ember/embernet import separate_by_feature
+from embernet import separate_by_feature
 
 modelpath = "../../ember_dataset/model.h5"
 #file_data = "adversarial_ember_samples.jsonl"
