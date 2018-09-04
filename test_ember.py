@@ -86,7 +86,7 @@ def create_metadata():
     pool = multiprocessing.Pool()
 
     feature_paths = ["adversarial_ember_samples_3.jsonl"]
-    records = list(pool.imap(ember.read_metadata_record, raw_feature_iterator(feature_paths)))
+    records = list(pool.imap(ember.read_metadata_record, ember.raw_feature_iterator(feature_paths)))
     records = [dict(record, **{"subset": "test"}) for record in records]
 
     metadf = pd.DataFrame(records)[["sha256", "appeared", "subset", "label"]]
