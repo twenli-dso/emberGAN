@@ -15,6 +15,8 @@ ndim = 128
 X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
+model = load_model(modelpath)
+
 y_pred = model.predict(X).reshape(len(y),)
 print("y_pred:",y_pred)
 acc = model.evaluate(X, y)[1]
