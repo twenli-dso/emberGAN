@@ -2,7 +2,7 @@ import ember
 from keras.models import load_model
 import pandas as pd
 import numpy as np
-from embernet import separate_by_feature
+import embernet
 
 modelpath = "../../ember_dataset/model.h5"
 #file_data = "adversarial_ember_samples.jsonl"
@@ -18,7 +18,7 @@ X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
 #separate X into 8 feature arrays
-X = separate_by_feature(X)
+X = embernet.separate_by_feature(X)
 
 model = load_model(modelpath)
 
