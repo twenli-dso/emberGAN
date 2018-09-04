@@ -90,7 +90,7 @@ ndim = 256
 X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
-X, y = scale_features(X, y)
+X, y = scale_features("../../ember_dataset", X, y)
 
 #separate X into 8 feature arrays
 X = separate_by_feature(X)
