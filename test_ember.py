@@ -19,7 +19,7 @@ X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
 #separate X into 8 feature arrays
-X = embernet.separate_by_feature(X)
+X = separate_by_feature(X)
 
 model = load_model(modelpath)
 
