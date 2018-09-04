@@ -9,7 +9,7 @@ def separate_by_feature(data):
         Separate data by feature group to feed multiple input model
         """
         extractor = PEFeatureExtractor()
-        dim = 256
+        dim = 128
         f_dict = {}
         end = 0
 
