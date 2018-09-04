@@ -2,7 +2,6 @@ import ember
 from keras.models import load_model
 import pandas as pd
 import numpy as np
-sys.path.append("../ember")
 from embernet import separate_by_feature
 
 modelpath = "../../ember_dataset/model.h5"
