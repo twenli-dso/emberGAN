@@ -77,6 +77,21 @@ def separate_by_feature(data):
         data_len = len(data)
         return [f_dict['histogram'].reshape(data_len, dim, 1), f_dict['byteentropy'].reshape(data_len, dim, 1), f_dict['strings'], f_dict['general'], f_dict['header'], f_dict['section'], f_dict['imports'], f_dict['exports']]
 
+def create_metadata():
+    """
+    Write metadata to a csv file and return its dataframe
+    """
+    pool = multiprocessing.Pool()
+
+    feature_paths = ["adversarial_ember_samples_3.jsonl"]
+    records = list(pool.imap(ember.read_metadata_record, raw_feature_iterator(feature_paths)))
+    records = [dict(record, **{"subset": "test"}) for record in records]
+
+    metadf = pd.DataFrame(records)[["sha256", "appeared", "subset", "label"]]
+    metadf.to_csv("metadata_test.csv")
+    return metadf
+
+create_metadata()
 
 modelpath = "../../ember_dataset/model.h5"
 #file_data = "adversarial_ember_samples.jsonl"
@@ -84,7 +99,7 @@ raw_feature_paths = ["adversarial_ember_samples_3.jsonl"]
 X_path = "X_adversarial_test.dat"
 y_path = "y_adversarial_test.dat"
 
-ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
+#ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
 
 #load X and y from .dat files
 ndim = 256
