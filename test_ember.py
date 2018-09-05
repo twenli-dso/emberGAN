@@ -6,7 +6,7 @@ from features import PEFeatureExtractor
 from sklearn import preprocessing
 import multiprocessing
 import os
-
+import pickle
  
 #scale and separate dataset by feature group
 def scale_features(data_dir, X, y):
