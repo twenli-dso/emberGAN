@@ -93,13 +93,14 @@ def create_metadata():
     metadf.to_csv("metadata_test.csv")
     return metadf
 
-create_metadata()
+#create_metadata()
 
 modelpath = "../../ember_dataset/model.h5"
 #file_data = "adversarial_ember_samples.jsonl"
 raw_feature_paths = ["adversarial_ember_samples_3.jsonl"]
 X_path = "X_adversarial_test.dat"
 y_path = "y_adversarial_test.dat"
+data_dir = "../../ember_dataset"
 
 #ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
 
@@ -108,8 +109,39 @@ ndim = 256
 X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
-X, y = scale_features("../../ember_dataset", X, y)
+#scale 
+#X, y = scale_features("../../ember_dataset", X, y)
 
+# Retrieve scalers used on train set
+pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
+scaler_dict = pickle.load(pickle_in)
+
+#test scaling on one sample
+first_feature_vector = X[0]
+
+print("Before scaling")
+scaled_feature_vector = np.copy(first_feature_vector)
+print(scaled_feature_vector)
+print(scaled_feature_vector.shape)
+
+# Scale each feature group using scalers fitted to train set
+extractor = PEFeatureExtractor()
+end = 0
+for feature in extractor.features:
+    scaler = scaler_dict[feature.name]
+    start = end
+    end += feature.dim
+    scaled_feature_vector[..., start:end] = scaler.transform(first_feature_vector[..., start:end].reshape(1, -1))
+print("After scaling", scaled_feature_vector)
+print(scaled_feature_vector.shape)
+
+sample = separate_by_feature(scaled_feature_vector)
+
+model = load_model(modelpath)
+
+print("model.predict(sample):",model.predict(sample))
+
+'''
 #separate X into 8 feature arrays
 X = separate_by_feature(X)
 
@@ -119,3 +151,4 @@ y_pred = model.predict(X).reshape(len(y),)
 print("y_pred:",y_pred)
 acc = model.evaluate(X, y)[1]
 print("acc:",acc)
+'''
