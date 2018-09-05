@@ -13,6 +13,8 @@ def scale_features(data_dir, X, y):
     # Read vectorized features
     emberdf = ember.read_metadata(data_dir)
 
+    print("emberdf.shape:",emberdf.shape)
+    print("X.shape:",X.shape)
     # Combine
     #X = np.concatenate((X_train, X_test))
     #y = np.concatenate((y_train, y_test))
@@ -106,13 +108,24 @@ data_dir = "../../ember_dataset"
 #ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
 
 #load X and y from .dat files
-ndim = 256
+ndim = PEFeatureExtractor.dim
 X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
 
 #scale 
-#X, y = scale_features("../../ember_dataset", X, y)
+X, y = scale_features("../../ember_dataset", X, y)
 
+#separate X into 8 feature arrays
+X = separate_by_feature(X)
+
+model = load_model(modelpath)
+
+y_pred = model.predict(X).reshape(len(y),)
+print("y_pred:",y_pred)
+acc = model.evaluate(X, y)[1]
+print("acc:",acc)
+
+'''
 # Retrieve scalers used on train set
 pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
 scaler_dict = pickle.load(pickle_in)
@@ -142,14 +155,4 @@ model = load_model(modelpath)
 
 print("model.predict(sample):",model.predict(sample))
 
-'''
-#separate X into 8 feature arrays
-X = separate_by_feature(X)
-
-model = load_model(modelpath)
-
-y_pred = model.predict(X).reshape(len(y),)
-print("y_pred:",y_pred)
-acc = model.evaluate(X, y)[1]
-print("acc:",acc)
 '''
