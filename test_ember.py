@@ -82,21 +82,20 @@ def separate_by_feature(data):
         data_len = len(data)
         return [f_dict['histogram'].reshape(data_len, dim, 1), f_dict['byteentropy'].reshape(data_len, dim, 1), f_dict['strings'], f_dict['general'], f_dict['header'], f_dict['section'], f_dict['imports'], f_dict['exports']]
 
-def create_metadata():
+def create_metadata(raw_feature_paths, data_dir):
     """
     Write metadata to a csv file and return its dataframe
     """
     pool = multiprocessing.Pool()
 
-    feature_paths = ["original_malware_samples.jsonl"]
+    feature_paths = raw_feature_paths
     records = list(pool.imap(ember.read_metadata_record, ember.raw_feature_iterator(feature_paths)))
     records = [dict(record, **{"subset": "test"}) for record in records]
 
     metadf = pd.DataFrame(records)[["sha256", "appeared", "subset", "label"]]
-    metadf.to_csv("metadata.csv")
+    metadf.to_csv(os.path.join(data_dir, 'metadata.csv')
+    
     return metadf
-
-create_metadata()
 
 modelpath = "../../ember_dataset/model.h5"
 raw_feature_paths = ["original_malware_samples.jsonl"]
@@ -104,22 +103,27 @@ raw_feature_paths = ["original_malware_samples.jsonl"]
 #y_path = "y_adversarial_test.dat"
 X_path = "X_orig_malware_test.dat"
 y_path = "y_orig_malware_test.dat"
-
 data_dir = "../../ember_dataset"
 
-ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
+#create metadata from json file
+create_metadata(raw_feature_paths, data_dir)
+
+#vectorize json file and store into .dat files
+num_samples = 369
+ember.vectorize_subset(X_path, y_path, raw_feature_paths, num_samples)
 
 #load X and y from .dat files
 ndim = PEFeatureExtractor.dim
-X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(369, ndim))
-y = np.memmap(y_path, dtype=np.float32, mode="r", shape=369)
+X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
+y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
 
-#scale 
-X, y = scale_features("../../ember_dataset", X, y)
+#scale X and y
+X, y = scale_features(data_dir, X, y)
 
 #separate X into 8 feature arrays
 X = separate_by_feature(X)
 
+#load model and get predicted results
 model = load_model(modelpath)
 
 y_pred = model.predict(X).reshape(len(y),)
