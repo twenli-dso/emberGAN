@@ -88,24 +88,26 @@ def create_metadata():
     """
     pool = multiprocessing.Pool()
 
-    feature_paths = ["adversarial_ember_samples_3.jsonl"]
+    feature_paths = ["original_malware_samples.jsonl"]
     records = list(pool.imap(ember.read_metadata_record, ember.raw_feature_iterator(feature_paths)))
     records = [dict(record, **{"subset": "test"}) for record in records]
 
     metadf = pd.DataFrame(records)[["sha256", "appeared", "subset", "label"]]
-    metadf.to_csv("metadata_test.csv")
+    metadf.to_csv("metadata.csv")
     return metadf
 
-#create_metadata()
+create_metadata()
 
 modelpath = "../../ember_dataset/model.h5"
-#file_data = "adversarial_ember_samples.jsonl"
-raw_feature_paths = ["adversarial_ember_samples_3.jsonl"]
-X_path = "X_adversarial_test.dat"
-y_path = "y_adversarial_test.dat"
+raw_feature_paths = ["original_malware_samples.jsonl"]
+#X_path = "X_adversarial_test.dat"
+#y_path = "y_adversarial_test.dat"
+X_path = "X_orig_malware_test.dat"
+y_path = "y_orig_malware_test.dat"
+
 data_dir = "../../ember_dataset"
 
-#ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
+ember.vectorize_subset(X_path, y_path, raw_feature_paths, 369)
 
 #load X and y from .dat files
 ndim = PEFeatureExtractor.dim
