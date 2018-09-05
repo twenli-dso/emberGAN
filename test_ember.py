@@ -93,7 +93,7 @@ def create_metadata(raw_feature_paths, data_dir):
     records = [dict(record, **{"subset": "test"}) for record in records]
 
     metadf = pd.DataFrame(records)[["sha256", "appeared", "subset", "label"]]
-    metadf.to_csv(os.path.join(data_dir, 'metadata.csv')
+    metadf.to_csv(os.path.join(data_dir, 'metadata.csv'))
     
     return metadf
 
