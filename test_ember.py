@@ -5,6 +5,7 @@ import numpy as np
 from features import PEFeatureExtractor
 from sklearn import preprocessing
 import multiprocessing
+import os
 
  
 #scale and separate dataset by feature group
