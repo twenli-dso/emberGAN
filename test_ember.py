@@ -98,7 +98,7 @@ def create_metadata(raw_feature_paths, data_dir):
     return metadf
 
 modelpath = "../../ember_dataset/model.h5"
-raw_feature_paths = ["original_malware_samples.jsonl"]
+raw_feature_paths = ["original_malware_samples_8192.jsonl"]
 #X_path = "X_adversarial_test.dat"
 #y_path = "y_adversarial_test.dat"
 X_path = "X_orig_malware_test.dat"
@@ -131,34 +131,3 @@ print("y_pred:",y_pred)
 acc = model.evaluate(X, y)[1]
 print("acc:",acc)
 
-'''
-# Retrieve scalers used on train set
-pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
-scaler_dict = pickle.load(pickle_in)
-
-#test scaling on one sample
-first_feature_vector = X[0]
-
-print("Before scaling")
-scaled_feature_vector = np.copy(first_feature_vector)
-print(scaled_feature_vector)
-print(scaled_feature_vector.shape)
-
-# Scale each feature group using scalers fitted to train set
-extractor = PEFeatureExtractor()
-end = 0
-for feature in extractor.features:
-    scaler = scaler_dict[feature.name]
-    start = end
-    end += feature.dim
-    scaled_feature_vector[..., start:end] = scaler.transform(first_feature_vector[..., start:end].reshape(1, -1))
-print("After scaling", scaled_feature_vector)
-print(scaled_feature_vector.shape)
-
-sample = separate_by_feature(scaled_feature_vector)
-
-model = load_model(modelpath)
-
-print("model.predict(sample):",model.predict(sample))
-
-'''
