@@ -109,7 +109,7 @@ data_dir = "../../ember_dataset"
 create_metadata(raw_feature_paths, data_dir)
 
 #vectorize json file and store into .dat files
-num_samples = 369
+num_samples = 1203
 ember.vectorize_subset(X_path, y_path, raw_feature_paths, num_samples)
 
 #load X and y from .dat files
