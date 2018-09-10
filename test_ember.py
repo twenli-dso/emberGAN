@@ -101,16 +101,18 @@ modelpath = "../../ember_dataset/model.h5"
 raw_feature_paths = ["original_malware_samples_8192.jsonl"]
 #X_path = "X_adversarial_test.dat"
 #y_path = "y_adversarial_test.dat"
-X_path = "X_orig_malware_test.dat"
-y_path = "y_orig_malware_test.dat"
+#X_path = "X_orig_malware_test.dat"
+#y_path = "y_orig_malware_test.dat"
+X_path = "X_test.dat"
+y_path = "y_test.dat"
 data_dir = "../../ember_dataset"
 
 #create metadata from json file
-create_metadata(raw_feature_paths, data_dir)
+#create_metadata(raw_feature_paths, data_dir)
 
 #vectorize json file and store into .dat files
-num_samples = 1203
-ember.vectorize_subset(X_path, y_path, raw_feature_paths, num_samples)
+num_samples = 200000
+#ember.vectorize_subset(X_path, y_path, raw_feature_paths, num_samples)
 
 #load X and y from .dat files
 ndim = PEFeatureExtractor.dim
