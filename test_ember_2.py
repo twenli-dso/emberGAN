@@ -30,7 +30,7 @@ y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
 scores = []
 for i in range(num_samples):
     score = ember.predict_samplevector(modelpath, X[i])
-    scores.add(score)
+    scores.append(score)
     print(score)
 
 scores_dict = dict(Counter(scores))
