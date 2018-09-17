@@ -31,8 +31,7 @@ scores = []
 for i in range(num_samples):
     score = ember.predict_samplevector(modelpath, X[i])
     scores.add(score)
-    if i % 10 == 0:
-        print("calculating score for sample:",i)
+    print(score)
 
 scores_dict = dict(Counter(scores))
 print("scores_dict:",scores_dict)
