@@ -2,6 +2,7 @@ import ember
 from keras.models import load_model
 import pandas as pd
 import numpy as np
+import json
 from features import PEFeatureExtractor
 from sklearn import preprocessing
 import multiprocessing
@@ -25,7 +26,15 @@ print(X_path)
 X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
 y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
 
-print(X[0].shape)
-for i in range(10):
+#print(X[0].shape)
+scores = []
+for i in range(num_samples):
     score = ember.predict_samplevector(modelpath, X[i])
-    print(score)
+    scores.add(score)
+    if i % 10 == 0:
+        print("calculating score for sample:",i)
+
+scores_dict = dict(Counter(scores))
+print("scores_dict:",scores_dict)
+with open("scores_dict_orig_malware.json", "w") as outfile:
+    json.dump(scores_dict, outfile)
