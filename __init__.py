@@ -31,6 +31,7 @@ def vectorize(irow, raw_features_string, X_path, y_path, nrows):
     extractor = PEFeatureExtractor()
     raw_features = json.loads(raw_features_string)
     feature_vector = extractor.process_raw_features(raw_features)
+    #print("feature_vector.shape:",feature_vector.shape)
 
     y = np.memmap(y_path, dtype=np.float32, mode="r+", shape=nrows)
     y[irow] = raw_features["label"]
@@ -50,14 +51,12 @@ def vectorize_subset(X_path, y_path, raw_feature_paths, nrows):
     """
     Vectorize a subset of data and write it to disk
     """
-    print("calling vectorize_subset")
     # Create space on disk to write features to
     extractor = PEFeatureExtractor()
     X = np.memmap(X_path, dtype=np.float32, mode="w+", shape=(nrows, extractor.dim))
     y = np.memmap(y_path, dtype=np.float32, mode="w+", shape=nrows)
     del X, y
 
-    print("raw_feature_iterator(raw_feature_paths):",raw_feature_iterator(raw_feature_paths))
     # Distribute the vectorization work
     pool = multiprocessing.Pool()
     argument_iterator = ((irow, raw_features_string, X_path, y_path, nrows)
@@ -219,8 +218,7 @@ def predict_sample(modelpath, file_data):
 
     return model.predict(sample)
 
-#modified predict_sample method to take in json file as input
-def predict_samples_json(modelpath, file_data):
+def predict_samplevector(modelpath, vector):
     """
     Predict a PE file with a neural network model
     """
@@ -230,16 +228,16 @@ def predict_samples_json(modelpath, file_data):
 
     # Extract features from binary
     extractor = PEFeatureExtractor()
-    feature_vector = np.array(extractor.feature_vector(file_data), dtype=np.float32)
+    feature_vector = np.array(vector, dtype=np.float32)
 
     # Retrieve scalers used on train set
     pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
     scaler_dict = pickle.load(pickle_in)
 
-    print("Before scaling")
+    #print("Before scaling")
     scaled_feature_vector = np.copy(feature_vector)
-    print(scaled_feature_vector)
-    print(scaled_feature_vector.shape)
+    #print(scaled_feature_vector)
+    #print(scaled_feature_vector.shape)
 
     # Scale each feature group using scalers fitted to train set
     end = 0
@@ -248,13 +246,12 @@ def predict_samples_json(modelpath, file_data):
         start = end
         end += feature.dim
         scaled_feature_vector[..., start:end] = scaler.transform(feature_vector[..., start:end].reshape(1, -1))
-    print("After scaling", scaled_feature_vector)
-    print(scaled_feature_vector.shape)
+    #print("After scaling", scaled_feature_vector)
+    #print(scaled_feature_vector.shape)
 
     sample = embernet.separate_by_feature(scaled_feature_vector)
 
     return model.predict(sample)
-
 
 def scale_features(data_dir):
     """
@@ -331,22 +328,29 @@ def find_threshold(y_true, y_pred, fpr_target):
     return thresh, fpr
 
 
-def add_data(data_dir, file_data, save_file):
+def add_data(data_dir, binaries, save_file):
     """
-    Add a PE file to train set
+    Add PE files to train set
     """
-    # Extract features from binary
-    print("Extracting features...")
     extractor = PEFeatureExtractor()
-    feature_vector = np.array(extractor.feature_vector(file_data), dtype=np.float32)
 
     # Load original dataset
     print("Loading from pickle...")
     df = pd.read_pickle(os.path.join(data_dir, 'df.pkl'))
 
-    # Append new feature vector and save
-    df = df.append(pd.Series(feature_vector), ignore_index=True)
-    print("Updating dataframe...")
+    for binary_path in binaries:
+        if not os.path.exists(binary_path):
+            print("{} does not exist".format(binary_path))
+
+        file_data = open(binary_path, "rb").read()
+
+        # Extract features from binary
+        feature_vector = np.array(extractor.feature_vector(file_data), dtype=np.float32)
+
+        # Append new feature vector
+        df = df.append(pd.Series(feature_vector), ignore_index=True)
+
+    print("Updated dataframe:")
     print(df)
-    print("Saving updated dataset to pickle...")
+    print("Saving to pickle...")
     df.to_pickle(os.path.join(data_dir, save_file))
