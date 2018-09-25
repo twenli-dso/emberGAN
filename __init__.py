@@ -240,13 +240,19 @@ def predict_samplevector(modelpath, vector):
     #print(scaled_feature_vector.shape)
 
     # Scale each feature group using scalers fitted to train set
-    end = 0
+    end = 4
+    scaled_feature_vector = scaled_feature_vector[:, :end]
     for feature in extractor.features:
         scaler = scaler_dict[feature.name]
         start = end
         end += feature.dim
         scaled_feature_vector[..., start:end] = scaler.transform(feature_vector[..., start:end].reshape(1, -1))
-    #print("After scaling", scaled_feature_vector)
+
+        feature_matrix = scaled_feature_vector[:, start:end].as_matrix().astype(float)
+        scaled_group = scaler.transform(feature_matrix)
+        scaled_feature_vector = pd.concat([scaled_feature_vector, pd.DataFrame(scaled_group)], axis=1)
+
+    print("After scaling", scaled_feature_vector)
     #print(scaled_feature_vector.shape)
 
     sample = embernet.separate_by_feature(scaled_feature_vector)
