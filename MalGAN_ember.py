@@ -11,10 +11,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn import linear_model, svm, tree
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import json
-from VOTEClassifier import VOTEClassifier
+#from VOTEClassifier import VOTEClassifier
 
 import test_ember_function
 import generate_input_data
