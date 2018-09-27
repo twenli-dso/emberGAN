@@ -16,7 +16,7 @@ import numpy as np
 import json
 from VOTEClassifier import VOTEClassifier
 
-#import test_ember_function
+import test_ember_function
 import generate_input_data
 
 original_feat_filepath = ""
@@ -37,6 +37,7 @@ class MalGAN():
 
         # Directories and filepaths for blackbox data
         self.jsonl_dir = "./samples/"
+        self.blackbox_modelpath = "../../ember_dataset/model.h5"
         self.bl_xtrain_mal_filepath = "bl_xtrain_mal.jsonl"
         self.bl_xtest_mal_filepath = "bl_xtest_mal.jsonl"
         self.bl_xtrain_ben_filepath = "bl_xtrain_ben.jsonl"
@@ -188,23 +189,34 @@ class MalGAN():
 
         #GENERATE BLACKBOX DATA (and save to jsonl file)
         self.generate_blackbox_data(train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices)
-        bl_ytrain_mal = ytrain_mal
-        bl_ytrain_ben = ytrain_ben
+        bl_ytrain_mal, bl_ytrain_ben, bl_ytest_mal, bl_ytest_ben = ytrain_mal, ytrain_ben, ytest_mal, ytest_ben
 
+        '''
         if self.same_train_data:
             bl_xtrain_mal, bl_ytrain_mal, bl_xtrain_ben, bl_ytrain_ben = xtrain_mal, ytrain_mal, xtrain_ben, ytrain_ben
         else:
             xtrain_mal, bl_xtrain_mal, ytrain_mal, bl_ytrain_mal = train_test_split(xtrain_mal, ytrain_mal, test_size=0.50)
             xtrain_ben, bl_xtrain_ben, ytrain_ben, bl_ytrain_ben = train_test_split(xtrain_ben, ytrain_ben, test_size=0.50)
-        
+
         # if is_first is Ture, Train the blackbox_detctor
         if is_first:
             self.blackbox_detector.fit(np.concatenate([xmal, xben]),
                                        np.concatenate([ymal, yben]))
+        '''
 
+        ytrain_ben_blackbox = test_ember_function.predict(blackbox_modelpath, bl_xtrain_ben_filepath, len(xtrain_ben))
+        Original_Train_TPR = test_ember_function.score(blackbox_modelpath, bl_xtrain_mal_filepath, bl_ytrain_mal)
+        Original_Test_TPR = test_ember_function.score(blackbox_modelpath, bl_xtest_mal_filepath, bl_ytest_mal)
+        print("ytrain_ben_blackbox:", ytrain_ben_blackbox)
+        print("Original_Train_TPR:",Original_Train_TPR)
+        print("Original_Test_TPR:",Original_Test_TPR)
+
+        '''
         ytrain_ben_blackbox = self.blackbox_detector.predict(bl_xtrain_ben)
         Original_Train_TPR = self.blackbox_detector.score(bl_xtrain_mal, bl_ytrain_mal)
         Original_Test_TPR = self.blackbox_detector.score(xtest_mal, ytest_mal)
+        '''
+
         Train_TPR, Test_TPR = [Original_Train_TPR], [Original_Test_TPR]
         best_TPR = 1.0
         for epoch in range(epochs):

@@ -13,11 +13,9 @@ import multiprocessing
 import os
 import pickle
 
-def predict(modelpath, raw_feature_paths):
+def predict(modelpath, raw_feature_paths, num_samples):
     X_path = "X_test_2.dat"
     y_path = "y_test_2.dat"
-    #num_samples = 1203
-    num_samples = 369
 
     ember.vectorize_subset(X_path, y_path, raw_feature_paths, num_samples)
 
@@ -28,7 +26,7 @@ def predict(modelpath, raw_feature_paths):
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
     
     scores = []
-    for i in range(5):
+    for i in range(num_samples):
         score = ember.predict_samplevector(modelpath, X[i])
         scores.append(score[0][0])
         print(score[0][0])
@@ -38,8 +36,17 @@ def predict(modelpath, raw_feature_paths):
     #TO DO: convert scores to binary
     return scores
 
-modelpath = "../../ember_dataset/model.h5"
-raw_feature_paths = ["original_malware_samples.jsonl"]
+def score(modelpath, raw_feature_paths, actual_labels)
+    num_samples = len(actual_labels)
+    predicted_labels = predict(modelpath, raw_feature_paths, len(actual_labels))
+    diff = np.subtract(predicted_labels, actual_labels)
+    num_wrong = np.count_nonzero(diff)
+    TPR = (num_samples - num_wrong) / num_samples
 
-labels = predict(modelpath, raw_feature_paths)
-print("labels: ", labels)
+    return TPR
+
+#modelpath = "../../ember_dataset/model.h5"
+#raw_feature_paths = ["original_malware_samples.jsonl"]
+
+#labels = predict(modelpath, raw_feature_paths)
+#print("labels: ", labels)
