@@ -26,13 +26,14 @@ def predict(modelpath, raw_feature_paths):
     #print(X_path)
     X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
-
-    #print(X[0].shape)
+    
     scores = []
-    for i in range(10):
+    for i in range(5):
         score = ember.predict_samplevector(modelpath, X[i])
-        scores.append(score)
-        print(score)
+        scores.append(score[0][0])
+        print(score[0][0])
+    
+    #scores = ember.predict_samplevector(modelpath, X)
 
     #TO DO: convert scores to binary
 

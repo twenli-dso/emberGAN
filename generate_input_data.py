@@ -1,57 +1,104 @@
 import json, glob, os
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from collections import Counter
 
-apistats_dir = './ember_apistats'
-select_number = 128
+def get_apistats(jsonl_dir):
+    filepaths = glob.glob(os.path.join(jsonl_dir, '*.jsonl'))
+    apistats_list = []
+    
+    for filepath in filepaths:
+        #print(filepath)
+        with open (filepath,"r") as infile:
+            for line_num, line in enumerate(infile):
 
-apis = []
-fs = glob.glob(os.path.join(apistats_dir, '*.json'))
-#fs = fs[:2048]
-counter = 1
-for f in fs:
-    if counter % 1000 == 0:
-        print("reading file",counter)
-    with open(f, 'r') as jsonfile:
-        data = json.load(jsonfile)
-        capis = data['apistats']
+                apistats_dict = {}
+
+                jsonline = json.loads(line)
+
+                sha256 = jsonline["sha256"]
+                label = jsonline["label"]
+                if label == 0:
+                    label = "benign"
+                else:
+                    label = "malware"
+
+                apistats_dict["name"] = sha256
+                apistats_dict["class"] = label
+
+                #retrieve api features and count occurrence of each api
+                imports = jsonline["imports"]
+                imports = list(imports.values())
+                imports_flattened = [item for sublist in imports for item in sublist]
+                imports_dict = dict(Counter(imports_flattened))
+
+                apistats_dict["apistats"] = imports_dict
+
+                apistats_list.append(apistats_dict)
+                
+    return apistats_list
+
+def generate_input_data(jsonl_dir):
+    
+    apistats_list = get_apistats(jsonl_dir)
+    select_number = 128
+
+    apis = []
+    for apistats_dict in apistats_list:
+        capis = apistats_dict['apistats']
         for api in capis.keys():
             if api not in apis:
                 apis.append(api)
-    counter += 1
 
-n_samples = len(fs)
-n_features = len(apis)
-loc = {}
-for i in range(n_features):
-    loc[apis[i]] = i
+    n_samples = len(apistats_list)
+    n_features = len(apis)
+    loc = {}
+    for i in range(n_features):
+        loc[apis[i]] = i
 
-x = np.zeros((n_samples, n_features))
-y = np.zeros((n_samples, ))
-for i in range(n_samples):
-    if i % 1000 == 0:
-        print("getting class of file",i)
-    with open(fs[i], 'r') as jsonfile:
-        data = json.load(jsonfile)
-        capis = data['apistats']
-        cls = data['class']
+    x = np.zeros((n_samples, n_features))
+    y = np.zeros((n_samples, ))
+    sha256_names = []
+    for i in range(n_samples):
+        apistats_dict = apistats_list[i]
+        capis = apistats_dict['apistats']
+        cls = apistats_dict['class']
         if cls == 'malware':
             y[i] = 1
         for api in capis.keys():
             x[i, loc[api]] = 1
 
-print("getting important features")
-feat_labels = apis   #特征列名
-forest = RandomForestClassifier(n_estimators=2000, random_state=0, n_jobs=-1)  #2000棵树,并行工作数是运行服务器决定
-forest.fit(x, y)
-importances = forest.feature_importances_   #feature_importances_特征列重要性占比
-indices = np.argsort(importances)[::-1]     #对参数从小到大排序的索引序号取逆,即最重要特征索引——>最不重要特征索引
-for f in range(x.shape[1]):
-    print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
+        sha256_names.append(apistats_dict['name'])
+    sha256_names = np.array(sha256_names)
 
-x = x[:, indices[:select_number]]
-xmal = x[np.where(y==1)]
-ymal = y[np.where(y==1)]
-xben = x[np.where(y==0)]
-yben = y[np.where(y==0)]
-np.savez('./data/data_ember_full.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben)
+    feat_labels = apis   #特征列名
+    forest = RandomForestClassifier(n_estimators=2000, random_state=0, n_jobs=-1)  #2000棵树,并行工作数是运行服务器决定
+    forest.fit(x, y)
+    importances = forest.feature_importances_   #feature_importances_特征列重要性占比
+    indices = np.argsort(importances)[::-1]     #对参数从小到大排序的索引序号取逆,即最重要特征索引——>最不重要特征索引
+    # for f in range(x.shape[1]):
+    #     print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
+
+    #get selected feat_labels from selected indices
+    feat_labels = np.array(feat_labels)
+    selected_feat_labels = feat_labels[indices[:select_number]]
+    #print('selected_feat_labels:',selected_feat_labels)
+
+    x = x[:, indices[:select_number]]
+    xmal = x[np.where(y==1)]
+    ymal = y[np.where(y==1)]
+    mal_names = sha256_names[np.where(y==1)]
+    #print("mal_names:",mal_names)
+
+    xben = x[np.where(y==0)]
+    yben = y[np.where(y==0)]
+    ben_names = sha256_names[np.where(y==0)]
+    #print("ben_names:",ben_names)
+
+    np.savez('data_ember_64.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben, mal_names=mal_names, ben_names=ben_names, selected_feat_labels = selected_feat_labels)
+
+    return (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels)
+
+#jsonl_dir = "./samples"
+#(xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = generate_input_data(jsonl_dir)
+#print("xben:",xben)
