@@ -204,9 +204,9 @@ class MalGAN():
                                        np.concatenate([ymal, yben]))
         '''
 
-        ytrain_ben_blackbox = test_ember_function.predict(blackbox_modelpath, bl_xtrain_ben_filepath, len(xtrain_ben))
-        Original_Train_TPR = test_ember_function.score(blackbox_modelpath, bl_xtrain_mal_filepath, bl_ytrain_mal)
-        Original_Test_TPR = test_ember_function.score(blackbox_modelpath, bl_xtest_mal_filepath, bl_ytest_mal)
+        ytrain_ben_blackbox = test_ember_function.predict(self.blackbox_modelpath, bl_xtrain_ben_filepath, len(xtrain_ben))
+        Original_Train_TPR = test_ember_function.score(self.blackbox_modelpath, bl_xtrain_mal_filepath, bl_ytrain_mal)
+        Original_Test_TPR = test_ember_function.score(self.blackbox_modelpath, bl_xtest_mal_filepath, bl_ytest_mal)
         print("ytrain_ben_blackbox:", ytrain_ben_blackbox)
         print("Original_Train_TPR:",Original_Train_TPR)
         print("Original_Test_TPR:",Original_Test_TPR)
