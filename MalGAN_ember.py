@@ -38,10 +38,10 @@ class MalGAN():
         # Directories and filepaths for blackbox data
         self.jsonl_dir = "./samples/"
         self.blackbox_modelpath = "../../ember_dataset/model.h5"
-        self.bl_xtrain_mal_filepath = "bl_xtrain_mal.jsonl"
-        self.bl_xtest_mal_filepath = "bl_xtest_mal.jsonl"
-        self.bl_xtrain_ben_filepath = "bl_xtrain_ben.jsonl"
-        self.bl_xtest_ben_filepath = "bl_xtest_ben.jsonl"
+        self.bl_xtrain_mal_filepath = "./blackbox_data/bl_xtrain_mal.jsonl"
+        self.bl_xtest_mal_filepath = "./blackbox_data/bl_xtest_mal.jsonl"
+        self.bl_xtrain_ben_filepath = "./blackbox_data/bl_xtrain_ben.jsonl"
+        self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
 
         # Build and Train blackbox_detector
         self.blackbox_detector = self.build_blackbox_detector()
@@ -145,22 +145,22 @@ class MalGAN():
                 elif line_num in test_ben_indices:
                     bl_xtest_ben.append(jsonline)
 
-        with open(os.path.join("./blackbox_data/", self.bl_xtrain_mal_filepath), 'w') as outfile:
+        with open(self.bl_xtrain_mal_filepath, 'w') as outfile:
             for jsonline in bl_xtrain_mal:
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
 
-        with open(os.path.join("./blackbox_data/", self.bl_xtest_mal_filepath), 'w') as outfile:
+        with open(self.bl_xtest_mal_filepath, 'w') as outfile:
             for jsonline in bl_xtest_mal:
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
 
-        with open(os.path.join("./blackbox_data/", self.bl_xtrain_ben_filepath), 'w') as outfile:
+        with open(self.bl_xtrain_ben_filepath, 'w') as outfile:
             for jsonline in bl_xtrain_ben:
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
 
-        with open(os.path.join("./blackbox_data/", self.bl_xtest_ben_filepath), 'w') as outfile:
+        with open(self.bl_xtest_ben_filepath, 'w') as outfile:
             for jsonline in bl_xtest_ben:
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
