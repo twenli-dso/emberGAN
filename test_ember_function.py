@@ -36,7 +36,7 @@ def predict(modelpath, raw_feature_paths, num_samples):
     #TO DO: convert scores to binary
     return scores
 
-def score(modelpath, raw_feature_paths, actual_labels)
+def score(modelpath, raw_feature_paths, actual_labels):
     num_samples = len(actual_labels)
     predicted_labels = predict(modelpath, raw_feature_paths, len(actual_labels))
     diff = np.subtract(predicted_labels, actual_labels)
