@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 import ember
 from keras.models import load_model
@@ -36,7 +36,6 @@ def predict(modelpath, raw_feature_paths):
     #scores = ember.predict_samplevector(modelpath, X)
 
     #TO DO: convert scores to binary
-
     return scores
 
 modelpath = "../../ember_dataset/model.h5"
