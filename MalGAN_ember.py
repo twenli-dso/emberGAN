@@ -170,7 +170,7 @@ class MalGAN():
         # print("bl_xtrain_mal size:",len(bl_xtrain_mal))
         # print("bl_xtest_mal size:",len(bl_xtest_mal))
 
-    def generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels):
+    def generate_adversarial_blackbox_data(self, gen_examples, xmal_batch, xmal_batch_names, feat_labels):
         # TODO: Append added features to blackbox data
         #Extract added features
         new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
@@ -322,7 +322,7 @@ class MalGAN():
                 #     for jsonline in jsonAdverArray:
                 #         json.dump(jsonline, outfile)
                 #         outfile.write('\n')
-                generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
+                self.generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
                 ymal_batch = test_ember_function.predict(self.blackbox_modelpath, "./blackbox_data/adver_xmal_batch.jsonl", len(xmal_batch))
                 print("ymal_batch:",ymal_batch)
