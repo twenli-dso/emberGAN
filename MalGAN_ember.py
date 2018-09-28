@@ -181,13 +181,13 @@ class MalGAN():
             added_feature_labels = feat_labels[np.where(added_feature == 1)]
             added_features_labels.append(added_feature_labels)
         
-        print("added_features_labels:",added_features_labels)
+        #print("added_features_labels:",added_features_labels)
 
         added_features_dict = {}
         for i, mal_name in enumerate(mal_names):
             added_features_dict[mal_name] = added_features_labels[i].tolist()
 
-        print("added_features_dict:",added_features_dict)
+        #print("added_features_dict:",added_features_dict)
 
         #find xmal_batch in blackbox data
         #find by name or idx? 
@@ -207,13 +207,12 @@ class MalGAN():
                         jsonline["imports"] = imports
                         jsonAdverArray.append(jsonline)
 
-        print("jsonAdverArray:",jsonAdverArray)
+        #print("jsonAdverArray:",jsonAdverArray)
 
         with open(self.bl_adver_mal_filepath, 'w') as outfile:
             for jsonline in jsonAdverArray:
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
-
 
     def train(self, epochs, batch_size=32, is_first=1):
 
@@ -256,12 +255,6 @@ class MalGAN():
         print("Original_Train_TPR:",Original_Train_TPR)
         print("Original_Test_TPR:",Original_Test_TPR)
 
-        '''
-        ytrain_ben_blackbox = self.blackbox_detector.predict(bl_xtrain_ben)
-        Original_Train_TPR = self.blackbox_detector.score(bl_xtrain_mal, bl_ytrain_mal)
-        Original_Test_TPR = self.blackbox_detector.score(xtest_mal, ytest_mal)
-        '''
-
         Train_TPR, Test_TPR = [Original_Train_TPR], [Original_Test_TPR]
         best_TPR = 1.0
         for epoch in range(epochs):
@@ -281,55 +274,11 @@ class MalGAN():
 
                 # Generate a batch of new malware examples
                 gen_examples = self.generator.predict([xmal_batch, noise])
-                
-                # # TODO: Append added features to blackbox data
-                # #Extract added features
-                # new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
-                # added_features = np.subtract(new_examples, xmal_batch)
-                # added_features_labels = []
-                # for added_feature in added_features:
-                #     added_feature_labels = feat_labels[np.where(added_feature == 1)]
-                #     added_features_labels.append(added_feature_labels)
-                
-                # print("added_features_labels:",added_features_labels)
-
-                # added_features_dict = {}
-                # for i, mal_name in enumerate(xmal_batch_names):
-                #     added_features_dict[mal_name] = added_features_labels[i].tolist()
-
-                # print("added_features_dict:",added_features_dict)
-
-                # #find xmal_batch in blackbox data
-                # #find by name or idx? 
-                # with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
-                #     jsonAdverArray = []
-                #     for line_num, line in enumerate(malfile):
-                #         jsonline = json.loads(line)
-                #         name = jsonline['sha256']
-                #         if name in added_features_dict:
-                #             added_features = added_features_dict[name]
-                #             imports = jsonline["imports"]
-                #             if len(imports) > 0:
-                #                 #add new features to first import module
-                #                 first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
-                #                 first_module_imports.extend(added_features)
-                #                 imports[list(imports.keys())[0]] = first_module_imports
-                #                 jsonline["imports"] = imports
-                #                 jsonAdverArray.append(jsonline)
-
-                # print("jsonAdverArray:",jsonAdverArray)
-
-                # with open("./blackbox_data/adver_xmal_batch.jsonl", 'w') as outfile:
-                #     for jsonline in jsonAdverArray:
-                #         json.dump(jsonline, outfile)
-                #         outfile.write('\n')
                 self.generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
                 ymal_batch = test_ember_function.predict(self.blackbox_modelpath, self.bl_adver_mal_filepath, len(xmal_batch))
                 print("ymal_batch:",ymal_batch)
-                #ymal_batch = self.blackbox_detector.predict(np.ones(gen_examples.shape)*(gen_examples > 0.5))
-                #print("gen_examples.shape:",gen_examples.shape)
-                #print("xben_batch[1]:",xben_batch[1])
+
                 # Train the substitute_detector
                 d_loss_real = self.substitute_detector.train_on_batch(gen_examples, ymal_batch) 
                 d_loss_fake = self.substitute_detector.train_on_batch(xben_batch, yben_batch)
@@ -464,20 +413,17 @@ class MalGAN():
         print('\nTrain_TPR: {0}, Test_TPR: {1}'.format(train_TPR, test_TPR))
 
 if __name__ == '__main__':
-    #blackbox_list = ['RF','LR', 'DT', 'SVM', 'VOTE', 'MLP']
-    blackbox_list = ['RF']
 
-    for blackbox in blackbox_list:
-        original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
-        original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
-        added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
+    original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
+    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
+    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
-        malgan = MalGAN(blackbox=blackbox)
-        malgan.train(epochs=100, batch_size=8)
+    malgan = MalGAN()
+    malgan.train(epochs=100, batch_size=8)
+    malgan.retrain_blackbox_detector()
+    malgan.train(epochs=20, batch_size=8, is_first=False)
+    '''
+    for i in range(10):
         malgan.retrain_blackbox_detector()
-        malgan.train(epochs=20, batch_size=8, is_first=False)
-        '''
-        for i in range(10):
-            malgan.retrain_blackbox_detector()
-            malgan.train(epochs=100, batch_size=64, is_first=False)
-        '''
+        malgan.train(epochs=100, batch_size=64, is_first=False)
+    '''
