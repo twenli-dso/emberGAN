@@ -170,6 +170,50 @@ class MalGAN():
         # print("bl_xtrain_mal size:",len(bl_xtrain_mal))
         # print("bl_xtest_mal size:",len(bl_xtest_mal))
 
+    def generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels):
+        # TODO: Append added features to blackbox data
+        #Extract added features
+        new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
+        added_features = np.subtract(new_examples, xmal_batch)
+        added_features_labels = []
+        for added_feature in added_features:
+            added_feature_labels = feat_labels[np.where(added_feature == 1)]
+            added_features_labels.append(added_feature_labels)
+        
+        print("added_features_labels:",added_features_labels)
+
+        added_features_dict = {}
+        for i, mal_name in enumerate(xmal_batch_names):
+            added_features_dict[mal_name] = added_features_labels[i].tolist()
+
+        print("added_features_dict:",added_features_dict)
+
+        #find xmal_batch in blackbox data
+        #find by name or idx? 
+        with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
+            jsonAdverArray = []
+            for line_num, line in enumerate(malfile):
+                jsonline = json.loads(line)
+                name = jsonline['sha256']
+                if name in added_features_dict:
+                    added_features = added_features_dict[name]
+                    imports = jsonline["imports"]
+                    if len(imports) > 0:
+                        #add new features to first import module
+                        first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
+                        first_module_imports.extend(added_features)
+                        imports[list(imports.keys())[0]] = first_module_imports
+                        jsonline["imports"] = imports
+                        jsonAdverArray.append(jsonline)
+
+        print("jsonAdverArray:",jsonAdverArray)
+
+        with open("./blackbox_data/adver_xmal_batch.jsonl", 'w') as outfile:
+            for jsonline in jsonAdverArray:
+                json.dump(jsonline, outfile)
+                outfile.write('\n')
+
+
     def train(self, epochs, batch_size=32, is_first=1):
 
         # Load and Split the dataset
@@ -237,47 +281,48 @@ class MalGAN():
                 # Generate a batch of new malware examples
                 gen_examples = self.generator.predict([xmal_batch, noise])
                 
-                # TODO: Append added features to blackbox data
-                #Extract added features
-                new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
-                added_features = np.subtract(new_examples, xmal_batch)
-                added_features_labels = []
-                for added_feature in added_features:
-                    added_feature_labels = feat_labels[np.where(added_feature == 1)]
-                    added_features_labels.append(added_feature_labels)
+                # # TODO: Append added features to blackbox data
+                # #Extract added features
+                # new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
+                # added_features = np.subtract(new_examples, xmal_batch)
+                # added_features_labels = []
+                # for added_feature in added_features:
+                #     added_feature_labels = feat_labels[np.where(added_feature == 1)]
+                #     added_features_labels.append(added_feature_labels)
                 
-                print("added_features_labels:",added_features_labels)
+                # print("added_features_labels:",added_features_labels)
 
-                added_features_dict = {}
-                for i, mal_name in enumerate(xmal_batch_names):
-                    added_features_dict[mal_name] = added_features_labels[i].tolist()
+                # added_features_dict = {}
+                # for i, mal_name in enumerate(xmal_batch_names):
+                #     added_features_dict[mal_name] = added_features_labels[i].tolist()
 
-                print("added_features_dict:",added_features_dict)
+                # print("added_features_dict:",added_features_dict)
 
-                #find xmal_batch in blackbox data
-                #find by name or idx? 
-                with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
-                    jsonAdverArray = []
-                    for line_num, line in enumerate(malfile):
-                        jsonline = json.loads(line)
-                        name = jsonline['sha256']
-                        if name in added_features_dict:
-                            added_features = added_features_dict[name]
-                            imports = jsonline["imports"]
-                            if len(imports) > 0:
-                                #add new features to first import module
-                                first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
-                                first_module_imports.extend(added_features)
-                                imports[list(imports.keys())[0]] = first_module_imports
-                                jsonline["imports"] = imports
-                                jsonAdverArray.append(jsonline)
+                # #find xmal_batch in blackbox data
+                # #find by name or idx? 
+                # with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
+                #     jsonAdverArray = []
+                #     for line_num, line in enumerate(malfile):
+                #         jsonline = json.loads(line)
+                #         name = jsonline['sha256']
+                #         if name in added_features_dict:
+                #             added_features = added_features_dict[name]
+                #             imports = jsonline["imports"]
+                #             if len(imports) > 0:
+                #                 #add new features to first import module
+                #                 first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
+                #                 first_module_imports.extend(added_features)
+                #                 imports[list(imports.keys())[0]] = first_module_imports
+                #                 jsonline["imports"] = imports
+                #                 jsonAdverArray.append(jsonline)
 
-                print("jsonAdverArray:",jsonAdverArray)
+                # print("jsonAdverArray:",jsonAdverArray)
 
-                with open("./blackbox_data/adver_xmal_batch.jsonl", 'w') as outfile:
-                    for jsonline in jsonAdverArray:
-                        json.dump(jsonline, outfile)
-                        outfile.write('\n')
+                # with open("./blackbox_data/adver_xmal_batch.jsonl", 'w') as outfile:
+                #     for jsonline in jsonAdverArray:
+                #         json.dump(jsonline, outfile)
+                #         outfile.write('\n')
+                generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
                 ymal_batch = test_ember_function.predict(self.blackbox_modelpath, "./blackbox_data/adver_xmal_batch.jsonl", len(xmal_batch))
                 print("ymal_batch:",ymal_batch)
