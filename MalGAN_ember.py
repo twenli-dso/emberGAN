@@ -413,7 +413,8 @@ class MalGAN():
         print('\nTrain_TPR: {0}, Test_TPR: {1}'.format(train_TPR, test_TPR))
 
 if __name__ == '__main__':
-
+    blackbox = ember
+    
     original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
     original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
