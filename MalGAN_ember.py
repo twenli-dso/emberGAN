@@ -204,10 +204,10 @@ class MalGAN():
                                        np.concatenate([ymal, yben]))
         '''
 
-        ytrain_ben_blackbox = test_ember_function.predict(self.blackbox_modelpath, self.bl_xtrain_ben_filepath, len(xtrain_ben))
+        #ytrain_ben_blackbox = test_ember_function.predict(self.blackbox_modelpath, self.bl_xtrain_ben_filepath, len(xtrain_ben))
         Original_Train_TPR = test_ember_function.score(self.blackbox_modelpath, self.bl_xtrain_mal_filepath, bl_ytrain_mal)
         Original_Test_TPR = test_ember_function.score(self.blackbox_modelpath, self.bl_xtest_mal_filepath, bl_ytest_mal)
-        print("ytrain_ben_blackbox:", ytrain_ben_blackbox)
+        #print("ytrain_ben_blackbox:", ytrain_ben_blackbox)
         print("Original_Train_TPR:",Original_Train_TPR)
         print("Original_Test_TPR:",Original_Test_TPR)
 
@@ -236,8 +236,46 @@ class MalGAN():
 
                 # Generate a batch of new malware examples
                 gen_examples = self.generator.predict([xmal_batch, noise])
+                
+                # TODO: Append added features to blackbox data
+                #Extract added features
+                new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
+                added_features = np.subtract(new_examples, xmal_batch)
+                added_features_labels = []
+                for added_feature in added_features:
+                    added_feature_labels = feat_labels[np.where(added_feature == 1)]
+                    added_features_labels.append(added_feature_labels)
+                
+                added_features_dict = {}
+                for i, mal_name in enumerate(xmal_batch_names):
+                    added_features_dict[mal_name] = added_features_labels[i].tolist()
 
-                ymal_batch = self.blackbox_detector.predict(np.ones(gen_examples.shape)*(gen_examples > 0.5))
+                #find xmal_batch in blackbox data
+                #find by name or idx? 
+                with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
+                    jsonAdverArray = []
+                    for line_num, line in enumerate(malfile):
+                        jsonline = json.loads(line)
+                        name = jsonline['sha256']
+                        if name in added_features_dict:
+                            added_features = added_features_dict[name]
+                            imports = jsonline["imports"]
+                            if len(imports) > 0:
+                                #add new features to first import module
+                                first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
+                                first_module_imports.extend(added_features)
+                                imports[list(imports.keys())[0]] = first_module_imports
+                                jsonline["imports"] = imports
+                                jsonAdverArray.append(jsonline)
+
+                with open("./blackbox_data/adver_xmal_batch.jsonl", 'w') as outfile:
+                    for jsonline in jsonAdverArray:
+                        json.dump(jsonline, outfile)
+                        outfile.write('\n')
+
+                ymal_batch = test_ember_function.predict(self.blackbox_modelpath, "./blackbox_data/adver_xmal_batch.jsonl", len(xmal_batch))
+
+                #ymal_batch = self.blackbox_detector.predict(np.ones(gen_examples.shape)*(gen_examples > 0.5))
                 #print("gen_examples.shape:",gen_examples.shape)
                 #print("xben_batch[1]:",xben_batch[1])
                 # Train the substitute_detector
