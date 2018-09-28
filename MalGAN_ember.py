@@ -42,6 +42,7 @@ class MalGAN():
         self.bl_xtest_mal_filepath = "./blackbox_data/bl_xtest_mal.jsonl"
         self.bl_xtrain_ben_filepath = "./blackbox_data/bl_xtrain_ben.jsonl"
         self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
+        self.bl_adver_mal_filepath = "./blackbox_data/adver_mal.jsonl"
 
         # Build and Train blackbox_detector
         self.blackbox_detector = self.build_blackbox_detector()
@@ -170,11 +171,11 @@ class MalGAN():
         # print("bl_xtrain_mal size:",len(bl_xtrain_mal))
         # print("bl_xtest_mal size:",len(bl_xtest_mal))
 
-    def generate_adversarial_blackbox_data(self, gen_examples, xmal_batch, xmal_batch_names, feat_labels):
+    def generate_adversarial_blackbox_data(self, gen_examples, orig_mal, mal_names, feat_labels):
         # TODO: Append added features to blackbox data
         #Extract added features
         new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
-        added_features = np.subtract(new_examples, xmal_batch)
+        added_features = np.subtract(new_examples, orig_mal)
         added_features_labels = []
         for added_feature in added_features:
             added_feature_labels = feat_labels[np.where(added_feature == 1)]
@@ -183,7 +184,7 @@ class MalGAN():
         print("added_features_labels:",added_features_labels)
 
         added_features_dict = {}
-        for i, mal_name in enumerate(xmal_batch_names):
+        for i, mal_name in enumerate(mal_names):
             added_features_dict[mal_name] = added_features_labels[i].tolist()
 
         print("added_features_dict:",added_features_dict)
@@ -208,7 +209,7 @@ class MalGAN():
 
         print("jsonAdverArray:",jsonAdverArray)
 
-        with open("./blackbox_data/adver_xmal_batch.jsonl", 'w') as outfile:
+        with open(self.bl_adver_mal_filepath, 'w') as outfile:
             for jsonline in jsonAdverArray:
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
@@ -324,7 +325,7 @@ class MalGAN():
                 #         outfile.write('\n')
                 self.generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
-                ymal_batch = test_ember_function.predict(self.blackbox_modelpath, "./blackbox_data/adver_xmal_batch.jsonl", len(xmal_batch))
+                ymal_batch = test_ember_function.predict(self.blackbox_modelpath, self.bl_adver_mal_filepath, len(xmal_batch))
                 print("ymal_batch:",ymal_batch)
                 #ymal_batch = self.blackbox_detector.predict(np.ones(gen_examples.shape)*(gen_examples > 0.5))
                 #print("gen_examples.shape:",gen_examples.shape)
@@ -351,13 +352,17 @@ class MalGAN():
             # Compute Train TPR
             noise = np.random.uniform(0, 1, (xtrain_mal.shape[0], self.z_dims))
             gen_examples = self.generator.predict([xtrain_mal, noise])
-            TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytrain_mal)
+            self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
+            TPR = test_ember_function.score(self.blackbox_modelpath, self.bl_adver_mal_filepath, bl_ytrain_mal)
+            #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytrain_mal)
             Train_TPR.append(TPR)
 
             # Compute Test TPR
             noise = np.random.uniform(0, 1, (xtest_mal.shape[0], self.z_dims))
             gen_examples = self.generator.predict([xtest_mal, noise])
-            TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytest_mal)
+            self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
+            TPR = test_ember_function.score(self.blackbox_modelpath, self.bl_adver_mal_filepath, bl_ytest_mal)
+            #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytest_mal)
             Test_TPR.append(TPR)
 
             # Save best model
