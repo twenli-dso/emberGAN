@@ -303,6 +303,7 @@ class MalGAN():
             gen_examples = self.generator.predict([xtrain_mal, noise])
             self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
             TPR = test_ember_function.score(self.blackbox_modelpath, self.bl_adver_mal_filepath, bl_ytrain_mal)
+            print("Train_TPR:",TPR)
             #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytrain_mal)
             Train_TPR.append(TPR)
 
@@ -312,6 +313,7 @@ class MalGAN():
             self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
             TPR = test_ember_function.score(self.blackbox_modelpath, self.bl_adver_mal_filepath, bl_ytest_mal)
             #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytest_mal)
+            print("Test_TPR:",TPR)
             Test_TPR.append(TPR)
 
             # Save best model
@@ -421,8 +423,8 @@ if __name__ == '__main__':
 
     malgan = MalGAN()
     malgan.train(epochs=100, batch_size=8)
-    malgan.retrain_blackbox_detector()
-    malgan.train(epochs=20, batch_size=8, is_first=False)
+    #malgan.retrain_blackbox_detector()
+    #malgan.train(epochs=20, batch_size=8, is_first=False)
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()
