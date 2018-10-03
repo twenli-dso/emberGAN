@@ -279,6 +279,8 @@ class MalGAN():
 
                 ymal_batch = test_ember_function.predict(self.blackbox_modelpath, self.bl_adver_mal_filepath, len(xmal_batch))
                 print("ymal_batch:",ymal_batch)
+                proc = psutil.Process()
+                print ("open_files:",proc.open_files())
 
                 # Train the substitute_detector
                 d_loss_real = self.substitute_detector.train_on_batch(gen_examples, ymal_batch) 
@@ -325,8 +327,8 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
-                proc = psutil.Process()
-                print (proc.open_files())
+                # proc = psutil.Process()
+                # print ("open_files:",proc.open_files())
 
         # ---------------------
         #  Save added features and original features 
