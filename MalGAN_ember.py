@@ -1,7 +1,6 @@
 
 # generator : 输入层维数：128（特征维数）+20（噪声维数）   隐层数：256  输出层：128
 # subsititude detector: 128 - 256 - 1
-import psutil
 import os
 from keras.layers import Input, Dense, Activation
 from keras.layers.merge import Maximum, Concatenate
@@ -279,8 +278,6 @@ class MalGAN():
 
                 ymal_batch = test_ember_function.predict(self.blackbox_modelpath, self.bl_adver_mal_filepath, len(xmal_batch))
                 print("ymal_batch:",ymal_batch)
-                proc = psutil.Process()
-                print ("open_files:",proc.open_files())
 
                 # Train the substitute_detector
                 d_loss_real = self.substitute_detector.train_on_batch(gen_examples, ymal_batch) 
