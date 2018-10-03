@@ -1,6 +1,7 @@
 
 # generator : 输入层维数：128（特征维数）+20（噪声维数）   隐层数：256  输出层：128
 # subsititude detector: 128 - 256 - 1
+import psutil
 import os
 from keras.layers import Input, Dense, Activation
 from keras.layers.merge import Maximum, Concatenate
@@ -324,6 +325,8 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+                proc = psutil.Process()
+                print (proc.open_files())
 
         # ---------------------
         #  Save added features and original features 
