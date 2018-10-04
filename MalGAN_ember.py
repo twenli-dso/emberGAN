@@ -191,7 +191,7 @@ class MalGAN():
 
         #find xmal_batch in blackbox data
         #find by name or idx? 
-        with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
+        with open(self.jsonl_dir + "malware_samples_384.jsonl", 'r') as malfile:
             jsonAdverArray = []
             for line_num, line in enumerate(malfile):
                 jsonline = json.loads(line)
@@ -424,7 +424,7 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=20, batch_size=8)
+    malgan.train(epochs=20, batch_size=32)
     #malgan.retrain_blackbox_detector()
     #malgan.train(epochs=20, batch_size=8, is_first=False)
     '''
