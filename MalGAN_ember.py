@@ -116,7 +116,7 @@ class MalGAN():
 
     def load_data(self):
         
-        return generate_input_data.generate_input_data(self.jsonl_dir)
+        return generate_input_data.generate_input_data(self.jsonl_dir, 'data_ember_512.npz')
         '''
         data = np.load(self.filename)
         xmal, ymal, xben, yben, mal_names, ben_names, feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']

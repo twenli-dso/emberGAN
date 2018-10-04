@@ -38,7 +38,7 @@ def get_apistats(jsonl_dir):
                 
     return apistats_list
 
-def generate_input_data(jsonl_dir):
+def generate_input_data(jsonl_dir, output_filepath):
     
     apistats_list = get_apistats(jsonl_dir)
     select_number = 128
@@ -95,7 +95,7 @@ def generate_input_data(jsonl_dir):
     ben_names = sha256_names[np.where(y==0)]
     #print("ben_names:",ben_names)
 
-    np.savez('data_ember_64.npz', xmal=xmal, ymal=ymal, xben=xben, yben=yben, mal_names=mal_names, ben_names=ben_names, selected_feat_labels = selected_feat_labels)
+    np.savez(output_filepath, xmal=xmal, ymal=ymal, xben=xben, yben=yben, mal_names=mal_names, ben_names=ben_names, selected_feat_labels = selected_feat_labels)
 
     return (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels)
 
