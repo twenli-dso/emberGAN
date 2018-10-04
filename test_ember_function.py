@@ -25,15 +25,18 @@ def predict(modelpath, raw_feature_path, num_samples):
     X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
     
+    '''
     scores = []
     for i in range(num_samples):
         score = ember.predict_samplevector(modelpath, X[i])
         scores.append(score[0][0])
         print(score[0][0])
-    
-    #scores = ember.predict_samplevector(modelpath, X)
+    '''
 
+    scores = ember.predict_samplevector(modelpath, X)
+    scores = scores.flatten()
     return np.around(scores)
+
 
 def score(modelpath, raw_feature_path, actual_labels):
     num_samples = len(actual_labels)
