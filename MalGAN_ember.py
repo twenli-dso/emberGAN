@@ -36,7 +36,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.jsonl_dir = "./samples/"
+        self.jsonl_dir = "./samples_512/"
         self.blackbox_modelpath = "../../ember_dataset/model.h5"
         self.bl_xtrain_mal_filepath = "./blackbox_data/bl_xtrain_mal.jsonl"
         self.bl_xtest_mal_filepath = "./blackbox_data/bl_xtest_mal.jsonl"
@@ -126,7 +126,7 @@ class MalGAN():
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
         #same_train_data, is_first?
-        with open(self.jsonl_dir + "malware_samples_48.jsonl", 'r') as malfile:
+        with open(self.jsonl_dir + "malware_samples_384.jsonl", 'r') as malfile:
             bl_xtrain_mal = []
             bl_xtest_mal = []
             for line_num, line in enumerate(malfile):
@@ -136,7 +136,7 @@ class MalGAN():
                 elif line_num in test_mal_indices:
                     bl_xtest_mal.append(jsonline)
 
-        with open(self.jsonl_dir + "benign_samples_16.jsonl", 'r') as benfile:
+        with open(self.jsonl_dir + "benign_samples_128.jsonl", 'r') as benfile:
             bl_xtrain_ben = []
             bl_xtest_ben = []
             for line_num, line in enumerate(benfile):
