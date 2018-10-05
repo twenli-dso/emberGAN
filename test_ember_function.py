@@ -12,7 +12,6 @@ from sklearn import preprocessing
 import multiprocessing
 import os
 import pickle
-from keras import backend as K
 
 def predict(modelpath, raw_feature_path, num_samples):
     X_path = "X_test_2.dat"
@@ -33,7 +32,6 @@ def predict(modelpath, raw_feature_path, num_samples):
         scores.append(score[0][0])
         print(score[0][0])
     '''
-    K.clear_session()
     scores = ember.predict_samplevector(modelpath, X)
     scores = scores.flatten()
     return np.around(scores)
