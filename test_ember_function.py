@@ -13,7 +13,7 @@ import multiprocessing
 import os
 import pickle
 
-def predict(modelpath, raw_feature_path, num_samples):
+def predict(model, modelpath, raw_feature_path, num_samples):
     X_path = "X_test_2.dat"
     y_path = "y_test_2.dat"
 
@@ -32,14 +32,15 @@ def predict(modelpath, raw_feature_path, num_samples):
         scores.append(score[0][0])
         print(score[0][0])
     '''
-    scores = ember.predict_samplevector(modelpath, X)
+    
+    scores = ember.predict_samplevector(model, modelpath, X)
     scores = scores.flatten()
     return np.around(scores)
 
 
-def score(modelpath, raw_feature_path, actual_labels):
+def score(model, modelpath, raw_feature_path, actual_labels):
     num_samples = len(actual_labels)
-    predicted_labels = predict(modelpath, raw_feature_path, len(actual_labels))
+    predicted_labels = predict(model, modelpath, raw_feature_path, len(actual_labels))
     diff = np.subtract(predicted_labels, actual_labels)
     num_wrong = np.count_nonzero(diff)
     TPR = (num_samples - num_wrong) / num_samples
