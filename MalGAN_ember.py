@@ -279,7 +279,7 @@ class MalGAN():
                 self.generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
                 ymal_batch = test_ember_function.predict(self.blackbox_model, self.blackbox_modelpath, self.bl_adver_mal_filepath, len(xmal_batch))
-                print("ymal_batch:",ymal_batch)
+                #print("ymal_batch:",ymal_batch)
 
                 # Train the substitute_detector
                 d_loss_real = self.substitute_detector.train_on_batch(gen_examples, ymal_batch) 
