@@ -46,6 +46,7 @@ class MalGAN():
         self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
         self.bl_adver_mal_filepath = "./blackbox_data/adver_mal.jsonl"
         #load scaler used for training ember
+        data_dir = os.path.dirname(self.blackbox_modelpath)
         pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
         self.scaler = pickle.load(pickle_in)
          
