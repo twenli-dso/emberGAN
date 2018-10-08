@@ -38,7 +38,10 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.jsonl_dir = "./samples_512/"
+        self.blackbox_num_samples = 2048
+        self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
+        self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
+        self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
         self.blackbox_modelpath = "../../ember_dataset/model.h5"
         self.blackbox_model = load_model(self.blackbox_modelpath)
         self.bl_xtrain_mal_filepath = "./blackbox_data/bl_xtrain_mal.jsonl"
@@ -46,6 +49,7 @@ class MalGAN():
         self.bl_xtrain_ben_filepath = "./blackbox_data/bl_xtrain_ben.jsonl"
         self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
         self.bl_adver_mal_filepath = "./blackbox_data/adver_mal.jsonl"
+        
         #load scaler used for training ember
         data_dir = os.path.dirname(self.blackbox_modelpath)
         pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
@@ -124,7 +128,7 @@ class MalGAN():
 
     def load_data(self):
         
-        return generate_input_data.generate_input_data(self.jsonl_dir, 'data_ember_512.npz')
+        return generate_input_data.generate_input_data(self.jsonl_dir, 'data_ember_%s.npz' % (self.blackbox_num_samples))
         '''
         data = np.load(self.filename)
         xmal, ymal, xben, yben, mal_names, ben_names, feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
@@ -134,7 +138,7 @@ class MalGAN():
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
         #same_train_data, is_first?
-        with open(self.jsonl_dir + "malware_samples_384.jsonl", 'r') as malfile:
+        with open(self.mal_samples_filepath, 'r') as malfile:
             bl_xtrain_mal = []
             bl_xtest_mal = []
             for line_num, line in enumerate(malfile):
@@ -144,7 +148,7 @@ class MalGAN():
                 elif line_num in test_mal_indices:
                     bl_xtest_mal.append(jsonline)
 
-        with open(self.jsonl_dir + "benign_samples_128.jsonl", 'r') as benfile:
+        with open(self.ben_samples_filepath, 'r') as benfile:
             bl_xtrain_ben = []
             bl_xtest_ben = []
             for line_num, line in enumerate(benfile):
@@ -199,7 +203,7 @@ class MalGAN():
 
         #find xmal_batch in blackbox data
         #find by name or idx? 
-        with open(self.jsonl_dir + "malware_samples_384.jsonl", 'r') as malfile:
+        with open(self.mal_samples_filepath, 'r') as malfile:
             jsonAdverArray = []
             for line_num, line in enumerate(malfile):
                 jsonline = json.loads(line)
