@@ -33,7 +33,7 @@ def predict(model, modelpath, scaler, raw_feature_path, num_samples):
         print(score[0][0])
     '''
     
-    scores = ember.predict_samplevector(model, modelpath, X, scaler)
+    scores = ember.predict_samplevector(model, modelpath, scaler, X)
     scores = scores.flatten()
     return np.around(scores)
 
