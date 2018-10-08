@@ -38,7 +38,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 2048
+        self.blackbox_num_samples = 4096
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
