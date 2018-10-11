@@ -355,6 +355,8 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+                with open("./MalGAN_ember_mapped_epoch_losses.txt", "w") as outfile:
+                    outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
                 # proc = psutil.Process()
                 # print ("open_files:",proc.open_files())
 
@@ -455,7 +457,7 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=100, batch_size=64)
+    malgan.train(epochs=50, batch_size=64)
     #malgan.retrain_blackbox_detector()
     #malgan.train(epochs=20, batch_size=8, is_first=False)
     '''
