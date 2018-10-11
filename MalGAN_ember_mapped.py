@@ -206,7 +206,7 @@ class MalGAN():
 
         #load api to module mapping
         ####TO DO: MAKE FILEPATH VARIABLE####
-        with open("./api_module_mapping/api_module_mapping_2048.jsonl", "r") as infile:
+        with open("./api_module_mapping/api_module_mapping_2048.json", "r") as infile:
             api_module_dict = json.load(infile)
 
         with open(self.mal_samples_filepath, 'r') as malfile:
