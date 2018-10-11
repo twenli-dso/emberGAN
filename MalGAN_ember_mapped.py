@@ -38,7 +38,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 2048
+        self.blackbox_num_samples = 8192
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -206,7 +206,7 @@ class MalGAN():
 
         #load api to module mapping
         ####TO DO: MAKE FILEPATH VARIABLE####
-        with open("./api_module_mapping/api_module_mapping_2048.json", "r") as infile:
+        with open("./api_module_mapping/api_module_mapping_%s.json" % (self.blackbox_num_samples), "r") as infile:
             api_module_dict = json.load(infile)
 
         with open(self.mal_samples_filepath, 'r') as malfile:
@@ -355,7 +355,7 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
-                with open("./MalGAN_ember_mapped_epoch_losses.txt", "w") as outfile:
+                with open("./MalGAN_ember_mapped_epoch_losses_8192.txt", "w") as outfile:
                     outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
                 # proc = psutil.Process()
                 # print ("open_files:",proc.open_files())
@@ -457,7 +457,7 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=50, batch_size=64)
+    malgan.train(epochs=100, batch_size=64)
     #malgan.retrain_blackbox_detector()
     #malgan.train(epochs=20, batch_size=8, is_first=False)
     '''
