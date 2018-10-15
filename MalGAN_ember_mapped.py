@@ -355,8 +355,8 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
-                with open("./MalGAN_ember_mapped_epoch_losses_8192.txt", "a") as outfile:
-                    outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+                with open("./MalGAN_ember_mapped_8192.txt", "a") as outfile:
+                    outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]\n" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
                 # proc = psutil.Process()
                 # print ("open_files:",proc.open_files())
 
