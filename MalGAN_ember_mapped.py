@@ -38,7 +38,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 8192
+        self.blackbox_num_samples = 2048
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -355,7 +355,7 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
-                with open("./MalGAN_ember_mapped_8192.txt", "a") as outfile:
+                with open("./MalGAN_ember_mapped_%s.txt" % (self.blackbox_num_samples) , "a") as outfile:
                     outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]\n" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
                 # proc = psutil.Process()
                 # print ("open_files:",proc.open_files())
