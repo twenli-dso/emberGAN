@@ -448,13 +448,13 @@ class MalGAN():
         retrained_ember = test_ember_function.retrain(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xtrain_mal))
 
         # Compute Train TPR
-        train_TPR = test_ember_function.score(self.blackbox_model, self.blackbox_modelpath, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
+        train_TPR = test_ember_function.score(retrained_ember, self.blackbox_modelpath, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
 
         # Compute Test TPR
         noise = np.random.uniform(0, 1, (xtest_mal.shape[0], self.z_dims))
         gen_examples = self.generator.predict([xtest_mal, noise])
         self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
-        test_TPR = test_ember_function.score(self.blackbox_model, self.blackbox_modelpath, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
+        test_TPR = test_ember_function.score(retrained_ember, self.blackbox_modelpath, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
         print('\n---TPR after the black-box detector is retrained(Before Retraining MalGAN).')
         print('\nTrain_TPR: {0}, Test_TPR: {1}'.format(train_TPR, test_TPR))
 
