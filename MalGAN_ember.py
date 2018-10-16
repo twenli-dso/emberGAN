@@ -38,7 +38,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 8192
+        self.blackbox_num_samples = 2048
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -184,7 +184,7 @@ class MalGAN():
         # print("bl_xtest_mal size:",len(bl_xtest_mal))
 
     def generate_adversarial_blackbox_data(self, gen_examples, orig_mal, mal_names, feat_labels):
-        # TODO: Append added features to blackbox data
+        #Append added features to blackbox data
         #Extract added features
         new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
         added_features = np.subtract(new_examples, orig_mal)
@@ -407,24 +407,54 @@ class MalGAN():
         '''
 
     def retrain_blackbox_detector(self):
+        '''
         (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
         xtrain_mal, xtest_mal, ytrain_mal, ytest_mal = train_test_split(xmal, ymal, test_size=0.20)
         xtrain_ben, xtest_ben, ytrain_ben, ytest_ben = train_test_split(xben, yben, test_size=0.20)
+        
         # Generate Train Adversarial Examples
         noise = np.random.uniform(0, 1, (xtrain_mal.shape[0], self.z_dims))
         gen_examples = self.generator.predict([xtrain_mal, noise])
         gen_examples = np.ones(gen_examples.shape) * (gen_examples > 0.5)
         self.blackbox_detector.fit(np.concatenate([xtrain_mal, xtrain_ben, gen_examples]),
                                    np.concatenate([ytrain_mal, ytrain_ben, ytrain_mal]))
+        '''
+
+        # Load and Split the dataset
+        (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
+        print("xmal shape:",xmal.shape)
+        print("xben shape:",xben.shape)
+        mal_indices = np.arange(xmal.shape[0])
+        ben_indices = np.arange(xben.shape[0])
+
+        xtrain_mal, xtest_mal, ytrain_mal, ytest_mal, train_mal_indices, test_mal_indices = train_test_split(xmal, ymal, mal_indices, test_size=0.20)
+        train_mal_names = mal_names[train_mal_indices]
+        test_mal_names = mal_names[test_mal_indices]
+
+        xtrain_ben, xtest_ben, ytrain_ben, ytest_ben, train_ben_indices, test_ben_indices = train_test_split(xben, yben, ben_indices, test_size=0.20)
+        train_ben_names = ben_names[train_ben_indices]
+        test_ben_names = ben_names[test_ben_indices]
+
+        # GENERATE BLACKBOX DATA (and save to jsonl file)
+        self.generate_blackbox_data(train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices)
+        bl_ytrain_mal, bl_ytrain_ben, bl_ytest_mal, bl_ytest_ben = ytrain_mal, ytrain_ben, ytest_mal, ytest_ben
+
+        # Generate Train Adversarial Examples
+        noise = np.random.uniform(0, 1, (xtrain_mal.shape[0], self.z_dims))
+        gen_examples = self.generator.predict([xtrain_mal, noise])
+        self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
+
+        # Retrain ember with adversarial examples
+        retrained_ember = test_ember_function.retrain(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xtrain_mal))
 
         # Compute Train TPR
-        train_TPR = self.blackbox_detector.score(gen_examples, ytrain_mal)
+        train_TPR = test_ember_function.score(self.blackbox_model, self.blackbox_modelpath, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
 
         # Compute Test TPR
         noise = np.random.uniform(0, 1, (xtest_mal.shape[0], self.z_dims))
         gen_examples = self.generator.predict([xtest_mal, noise])
-        gen_examples = np.ones(gen_examples.shape) * (gen_examples > 0.5)
-        test_TPR = self.blackbox_detector.score(gen_examples, ytest_mal)
+        self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
+        test_TPR = test_ember_function.score(self.blackbox_model, self.blackbox_modelpath, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
         print('\n---TPR after the black-box detector is retrained(Before Retraining MalGAN).')
         print('\nTrain_TPR: {0}, Test_TPR: {1}'.format(train_TPR, test_TPR))
 
@@ -436,9 +466,9 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=100, batch_size=64)
-    #malgan.retrain_blackbox_detector()
-    #malgan.train(epochs=20, batch_size=8, is_first=False)
+    malgan.train(epochs=50, batch_size=64)
+    malgan.retrain_blackbox_detector()
+    malgan.train(epochs=20, batch_size=64)
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()
