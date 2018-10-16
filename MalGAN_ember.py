@@ -38,7 +38,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 2048
+        self.blackbox_num_samples = 8192
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -394,20 +394,7 @@ class MalGAN():
         plt.show()
         '''
 
-    def retrain_blackbox_detector(self):
-        '''
-        (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
-        xtrain_mal, xtest_mal, ytrain_mal, ytest_mal = train_test_split(xmal, ymal, test_size=0.20)
-        xtrain_ben, xtest_ben, ytrain_ben, ytest_ben = train_test_split(xben, yben, test_size=0.20)
-        
-        # Generate Train Adversarial Examples
-        noise = np.random.uniform(0, 1, (xtrain_mal.shape[0], self.z_dims))
-        gen_examples = self.generator.predict([xtrain_mal, noise])
-        gen_examples = np.ones(gen_examples.shape) * (gen_examples > 0.5)
-        self.blackbox_detector.fit(np.concatenate([xtrain_mal, xtrain_ben, gen_examples]),
-                                   np.concatenate([ytrain_mal, ytrain_ben, ytrain_mal]))
-        '''
-
+    def retrain_blackbox_detector(self, epochs, batch_size):
         # Load and Split the dataset
         (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
         print("xmal shape:",xmal.shape)
@@ -433,7 +420,7 @@ class MalGAN():
         self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
 
         # Retrain ember with adversarial examples
-        retrained_ember = test_ember_function.retrain(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xtrain_mal))
+        retrained_ember = test_ember_function.retrain(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xtrain_mal), epochs, batch_size)
 
         # Compute Train TPR
         train_TPR = test_ember_function.score(retrained_ember, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
@@ -454,8 +441,8 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=50, batch_size=64)
-    malgan.retrain_blackbox_detector()
+    malgan.train(epochs=100, batch_size=64)
+    malgan.retrain_blackbox_detector(epochs=100, batch_size=64)
     malgan.train(epochs=50, batch_size=64)
     '''
     for i in range(10):

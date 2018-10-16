@@ -47,7 +47,7 @@ def score(model, scaler, raw_feature_path, actual_labels):
 
     return TPR
 
-def retrain(model, scaler, raw_feature_path, num_samples):
+def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
     X_path = "X_test_retrain.dat"
     y_path = "y_test_retrain.dat"
 
@@ -59,8 +59,6 @@ def retrain(model, scaler, raw_feature_path, num_samples):
     X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
     
-    epochs = 50
-    batch_size = 64
     retrained_model = ember.retrain_model(model, scaler, X, y, epochs, batch_size)
     retrained_model.save("./blackbox_data/adver/retrained_model.h5")
 
