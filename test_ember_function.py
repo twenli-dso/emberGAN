@@ -67,7 +67,7 @@ def retrain(model, scaler, raw_feature_path, num_samples):
     return retrained_model
 
 model = load_model("./blackbox_data/adver/model.h5")
-pickle_in = open("../../ember_dataset/scalers.pickle")
+pickle_in = open("../../ember_dataset/scalers.pickle", "rb")
 scaler = pickle.load(pickle_in)
 raw_feature_path = "./blackbox_data/adver/adver_mal.jsonl"
 retrain(model, scaler, raw_feature_path, int(0.2*8192))
