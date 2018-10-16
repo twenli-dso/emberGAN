@@ -47,6 +47,30 @@ def score(model, modelpath, scaler, raw_feature_path, actual_labels):
 
     return TPR
 
+def retrain(model, scaler, raw_feature_path, num_samples):
+    X_path = "X_test_retrain.dat"
+    y_path = "y_test_retrain.dat"
+
+    ember.vectorize_subset(X_path, y_path, [raw_feature_path], num_samples)
+
+    #load X and y from .dat files
+    ndim = PEFeatureExtractor.dim
+    #print(X_path)
+    X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
+    y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
+    
+    epochs = 100
+    batch_size = 64
+    retrained_model = ember.retrain_model(model, scaler, X, y, epochs, batch_size)
+    retrained_model.save("./blackbox_data/adver/retrained_model.h5")
+
+    return retrained_model
+
+model = load_model("./blackbox_data/adver/model.h5")
+pickle_in = open("../../ember_dataset/scalers.pickle")
+scaler = pickle.load(pickle_in)
+raw_feature_path = "./blackbox_data/adver/adver_mal.jsonl"
+retrain(model, scaler, raw_feature_path, int(0.2*8192))
 #modelpath = "../../ember_dataset/model.h5"
 #raw_feature_paths = ["original_malware_samples.jsonl"]
 
