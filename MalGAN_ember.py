@@ -20,6 +20,7 @@ import pickle
 
 import test_ember_function
 import generate_input_data
+import api_module_mapping
 
 original_feat_filepath = ""
 original_ben_feat_filepath = ""
@@ -38,7 +39,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 8192
+        self.blackbox_num_samples = 2048
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -54,10 +55,6 @@ class MalGAN():
         data_dir = os.path.dirname(self.blackbox_modelpath)
         pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
         self.scaler = pickle.load(pickle_in)
-         
-
-        # Build and Train blackbox_detector
-        self.blackbox_detector = self.build_blackbox_detector()
 
         # Build and compile the substitute_detector
         self.substitute_detector = self.build_substitute_detector()
@@ -82,25 +79,6 @@ class MalGAN():
         # Trains the generator to fool the discriminator
         self.combined = Model(input, validity)
         self.combined.compile(loss='binary_crossentropy', optimizer=optimizer)
-
-    def build_blackbox_detector(self):
-
-        if self.blackbox is 'RF':
-            blackbox_detector = RandomForestClassifier(n_estimators=100, max_depth=3, random_state=1)
-        elif self.blackbox is 'SVM':
-            blackbox_detector = svm.SVC()
-        elif self.blackbox is 'LR':
-            blackbox_detector = linear_model.LogisticRegression()
-        elif self.blackbox is 'DT':
-            blackbox_detector = tree.DecisionTreeRegressor()
-        elif self.blackbox is 'MLP':
-            blackbox_detector = MLPClassifier(hidden_layer_sizes=(50,), max_iter=10, alpha=1e-4,
-                                              solver='sgd', verbose=0, tol=1e-4, random_state=1,
-                                              learning_rate_init=.1)
-        elif self.blackbox is 'VOTE':
-            blackbox_detector = VOTEClassifier()
-
-        return blackbox_detector
 
     def build_generator(self):
 
@@ -128,12 +106,7 @@ class MalGAN():
 
     def load_data(self):
         
-        return generate_input_data.generate_input_data(self.jsonl_dir, 'data_ember_%s.npz' % (self.blackbox_num_samples))
-        '''
-        data = np.load(self.filename)
-        xmal, ymal, xben, yben, mal_names, ben_names, feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
-        return (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels)
-        '''
+        return generate_input_data.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
@@ -184,7 +157,7 @@ class MalGAN():
         # print("bl_xtest_mal size:",len(bl_xtest_mal))
 
     def generate_adversarial_blackbox_data(self, gen_examples, orig_mal, mal_names, feat_labels):
-        #Append added features to blackbox data
+        # TODO: Append added features to blackbox data
         #Extract added features
         new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
         added_features = np.subtract(new_examples, orig_mal)
@@ -203,6 +176,15 @@ class MalGAN():
 
         #find xmal_batch in blackbox data
         #find by name or idx? 
+
+        #load api to module mapping or generate it if doesn't exist
+        ####TO DO: MAKE FILEPATH VARIABLE####
+        try:
+            with open("./api_module_mapping/api_module_mapping_%s.json" % (self.blackbox_num_samples), "r") as infile:
+                api_module_dict = json.load(infile)
+        except FileNotFoundError:
+                api_module_dict = api_module_mapping.gen_api_module_mapping(self.blackbox_num_samples)
+
         with open(self.mal_samples_filepath, 'r') as malfile:
             jsonAdverArray = []
             for line_num, line in enumerate(malfile):
@@ -213,9 +195,20 @@ class MalGAN():
                     imports = jsonline["imports"]
                     if len(imports) > 0:
                         #add new features to first import module
-                        first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
-                        first_module_imports.extend(added_features)
-                        imports[list(imports.keys())[0]] = first_module_imports
+                        #add new features to mapped module if exists, otherwise insert into first module
+                        for added_feature in added_features:
+                            mapped_module = api_module_dict[added_feature]
+                            
+                            if mapped_module in imports:
+                                mapped_module_imports = imports[mapped_module]
+                                mapped_module_imports.append(added_feature)
+                                imports[mapped_module] = mapped_module_imports
+                            else:
+                                #add to first module if mapped_module does not exist for this malfile
+                                first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
+                                first_module_imports.append(added_feature)
+                                imports[list(imports.keys())[0]] = first_module_imports
+                                
                         jsonline["imports"] = imports
                         jsonAdverArray.append(jsonline)
 
@@ -324,6 +317,8 @@ class MalGAN():
             # Plot the progress
             if is_first:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+                with open("./MalGAN_ember_mapped_%s.txt" % (self.blackbox_num_samples) , "a") as outfile:
+                    outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]\n" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
                 # proc = psutil.Process()
                 # print ("open_files:",proc.open_files())
 
@@ -441,9 +436,9 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=100, batch_size=64)
-    malgan.retrain_blackbox_detector(epochs=100, batch_size=64)
-    malgan.train(epochs=50, batch_size=64)
+    malgan.train(epochs=20, batch_size=64)
+    malgan.retrain_blackbox_detector(epochs=20, batch_size=64)
+    malgan.train(epochs=10, batch_size=64)
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()

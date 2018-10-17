@@ -3,6 +3,55 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from collections import Counter
 
+# Extract samples from original jsonl feature file from ember into samples_n directory, split into malware and benign jsonl files.
+def extract_n_samples(n, emberfp):
+    #create samples_n directory if doesn't exist
+    samples_dir = "./samples_%s" % (n)
+    os.makedirs(samples_dir, exist_ok=True)
+    
+    num_benign = int(n * 0.2)
+    num_malware = int(n * 0.8)
+    
+    counter = 0
+    jsonArray = []
+    with open(emberfp, 'r') as emberfile:
+        for line_num, line in enumerate(emberfile):
+            if counter < num_benign:
+                jsonline = json.loads(line)
+                label = jsonline["label"]
+
+                #add to array if benign
+                if label == 0:
+                    jsonArray.append(jsonline)
+                    counter += 1
+            else:
+                break
+
+    with open('%s/benign_samples_%s.jsonl' % (samples_dir, num_benign), 'w') as outfile:
+        for jsonline in jsonArray:
+            json.dump(jsonline, outfile)
+            outfile.write('\n')
+            
+    counter = 0
+    jsonArray = []
+    with open(emberfp, 'r') as emberfile:
+        for line_num, line in enumerate(emberfile):
+            if counter < num_malware:
+                jsonline = json.loads(line)
+                label = jsonline["label"]
+
+                #add to array if malware
+                if label == 1:
+                    jsonArray.append(jsonline)
+                    counter += 1
+            else:
+                break
+
+    with open('%s/malware_samples_%s.jsonl' % (samples_dir, num_malware), 'w') as outfile:
+        for jsonline in jsonArray:
+            json.dump(jsonline, outfile)
+            outfile.write('\n')
+
 def get_apistats(jsonl_dir):
     filepaths = glob.glob(os.path.join(jsonl_dir, '*.jsonl'))
     apistats_list = []
@@ -38,8 +87,12 @@ def get_apistats(jsonl_dir):
                 
     return apistats_list
 
-def generate_input_data(jsonl_dir, output_filepath):
-    
+#TODO: make test_features.jsonl a global variable
+def generate_input_data(jsonl_dir, n, output_filepath):
+    #extract samples if samples dir doesn't exist
+    if not os.path.exists(jsonl_dir):
+        extract_n_samples(n, "../../ember_dataset/test_features.jsonl")
+
     apistats_list = get_apistats(jsonl_dir)
     select_number = 128
 
