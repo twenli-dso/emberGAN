@@ -39,7 +39,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 2048
+        self.blackbox_num_samples = 4096
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -174,9 +174,6 @@ class MalGAN():
 
         #print("added_features_dict:",added_features_dict)
 
-        #find xmal_batch in blackbox data
-        #find by name or idx? 
-
         #load api to module mapping or generate it if doesn't exist
         ####TO DO: MAKE FILEPATH VARIABLE####
         try:
@@ -194,7 +191,6 @@ class MalGAN():
                     added_features = added_features_dict[name]
                     imports = jsonline["imports"]
                     if len(imports) > 0:
-                        #add new features to first import module
                         #add new features to mapped module if exists, otherwise insert into first module
                         for added_feature in added_features:
                             mapped_module = api_module_dict[added_feature]
@@ -436,9 +432,9 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
+    malgan.train(epochs=50, batch_size=64)
+    malgan.retrain_blackbox_detector(epochs=50, batch_size=64)
     malgan.train(epochs=20, batch_size=64)
-    malgan.retrain_blackbox_detector(epochs=20, batch_size=64)
-    malgan.train(epochs=10, batch_size=64)
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()
