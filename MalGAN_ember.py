@@ -176,11 +176,13 @@ class MalGAN():
 
         #load api to module mapping or generate it if doesn't exist
         ####TO DO: MAKE FILEPATH VARIABLE####
+        '''
         try:
             with open("./api_module_mapping/api_module_mapping_%s.json" % (self.blackbox_num_samples), "r") as infile:
                 api_module_dict = json.load(infile)
         except FileNotFoundError:
                 api_module_dict = api_module_mapping.gen_api_module_mapping(self.blackbox_num_samples)
+        '''
 
         with open(self.mal_samples_filepath, 'r') as malfile:
             jsonAdverArray = []
@@ -191,6 +193,11 @@ class MalGAN():
                     added_features = added_features_dict[name]
                     imports = jsonline["imports"]
                     if len(imports) > 0:
+                        #add new features to first import module
+                        first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
+                        first_module_imports.extend(added_features)
+                        imports[list(imports.keys())[0]] = first_module_imports
+                        '''
                         #add new features to mapped module if exists, otherwise insert into first module
                         for added_feature in added_features:
                             mapped_module = api_module_dict[added_feature]
@@ -204,7 +211,7 @@ class MalGAN():
                                 first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
                                 first_module_imports.append(added_feature)
                                 imports[list(imports.keys())[0]] = first_module_imports
-                                
+                        '''
                         jsonline["imports"] = imports
                         jsonAdverArray.append(jsonline)
 
