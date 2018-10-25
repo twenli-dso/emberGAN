@@ -39,12 +39,17 @@ def score(model, scaler, raw_feature_path, actual_labels):
     
     actual_labels = np.array(actual_labels)
     predicted_labels = np.array(predicted_labels)
-    
+
     mal_pos = np.where(actual_labels == 1)
+    print("mal_pos: ", mal_pos)
+    print("len(mal_pos): ", len(mal_pos))
     mal_labels = actual_labels[mal_pos]
     pred_labels_for_mal = predicted_labels[mal_pos]
     diff = np.subtract(mal_labels, pred_labels_for_mal)
+    print("diff: ", diff)
+    print("len(diff): ", len(diff))
     false_positives = np.count_nonzero(diff)
+    print("len(false_positives): ", len(false_positives))
     TPR = (len(mal_pos) - false_positives) / len(mal_pos)
 
     return TPR
