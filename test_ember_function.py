@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
 
 import ember
 from keras.models import load_model
@@ -33,9 +33,16 @@ def predict(model, scaler, raw_feature_path, num_samples):
 def score(model, scaler, raw_feature_path, actual_labels):
     num_samples = len(actual_labels)
     predicted_labels = predict(model, scaler, raw_feature_path, len(actual_labels))
-    diff = np.subtract(predicted_labels, actual_labels)
-    num_wrong = np.count_nonzero(diff)
-    TPR = (num_samples - num_wrong) / num_samples
+    # diff = np.subtract(predicted_labels, actual_labels)
+    # num_wrong = np.count_nonzero(diff)
+    # TPR = (num_samples - num_wrong) / num_samples
+
+    mal_pos = np.where(actual_labels == 1)
+    mal_labels = actual_labels[mal_pos]
+    pred_labels_for_mal = predicted_labels[mal_pos]
+    diff = np.subtract(mal_labels, pred_labels_for_mal)
+    false_positives = np.count_nonzero(diff)
+    TPR = (len(mal_pos) - false_positives) / len(mal_pos)
 
     return TPR
 
