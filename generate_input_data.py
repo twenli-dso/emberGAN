@@ -109,6 +109,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
     for i in range(n_features):
         loc[apis[i]] = i
 
+    print("n_features: ", n_features)
     x = np.zeros((n_samples, n_features))
     y = np.zeros((n_samples, ))
     sha256_names = []
