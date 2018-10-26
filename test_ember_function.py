@@ -69,6 +69,7 @@ def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
 
     return retrained_model
 
+'''
 model = load_model("./blackbox_data/adver/model.h5")
 retrained_model = load_model("./blackbox_data/adver/retrained_model.h5")
 
@@ -89,3 +90,4 @@ print("Original model TPR: ", score)
 
 score = score(retrained_model, scaler, raw_feature_path, actual_labels)
 print("Retrained model TPR: ", score)
+'''
