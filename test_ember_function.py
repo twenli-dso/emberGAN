@@ -84,7 +84,8 @@ with open(raw_feature_path, "r") as infile:
         label = jsonline["label"]
         actual_labels.append(label)
 
-print("actual_labels.shape: ", len(actual_labels))
+score = score(model, scaler, raw_feature_path, actual_labels)
+print("Original model TPR: ", score)
 
 score = score(retrained_model, scaler, raw_feature_path, actual_labels)
-print("TPR: ", score)
+print("Retrained model TPR: ", score)
