@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
 import ember
 from keras.models import load_model
@@ -70,6 +70,8 @@ def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
     return retrained_model
 
 model = load_model("./blackbox_data/adver/model.h5")
+retrained_model = load_model("./blackbox_data/adver/retrained_model.h5")
+
 pickle_in = open("../../ember_dataset/scalers.pickle", "rb")
 scaler = pickle.load(pickle_in)
 raw_feature_path = "../../ember_dataset/test_features.jsonl"
@@ -84,5 +86,5 @@ with open(raw_feature_path, "r") as infile:
 
 print("actual_labels.shape: ", len(actual_labels))
 
-score = score(model, scaler, raw_feature_path, actual_labels)
+score = score(retrained_model, scaler, raw_feature_path, actual_labels)
 print("TPR: ", score)
