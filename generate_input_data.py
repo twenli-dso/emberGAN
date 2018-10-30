@@ -108,7 +108,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
     n_samples = len(apistats_list)
     n_features = len(apis)
     #print("n_features: ", n_features)
-    n_features = 2000
+    #n_features = 2000
     loc = {}
     for i in range(n_features):
         loc[apis[i]] = i
@@ -122,8 +122,9 @@ def generate_input_data(jsonl_dir, n, output_filepath):
         cls = apistats_dict['class']
         if cls == 'malware':
             y[i] = 1
-        for api in apis:
-            x[i, loc[api]] = 1
+        for api in capis.keys():
+            if api in apis:
+                x[i, loc[api]] = 1
 
         sha256_names.append(apistats_dict['name'])
     sha256_names = np.array(sha256_names)
