@@ -117,6 +117,8 @@ def generate_input_data(jsonl_dir, n, output_filepath):
     y = np.zeros((n_samples, ))
     sha256_names = []
     for i in range(n_samples):
+        if i%1000 == 0:
+            print("processing sample #", i)
         apistats_dict = apistats_list[i]
         capis = apistats_dict['apistats']
         cls = apistats_dict['class']
