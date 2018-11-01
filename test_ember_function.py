@@ -69,23 +69,23 @@ def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
 
     return retrained_model
 
-# model = load_model("./blackbox_data/adver/model.h5")
-# retrained_model = load_model("./blackbox_data/adver/retrained_model.h5")
+model = load_model("./blackbox_data/adver/model.h5")
+retrained_model = load_model("./blackbox_data/adver/retrained_model.h5")
 
-# pickle_in = open("../../ember_dataset/scalers.pickle", "rb")
-# scaler = pickle.load(pickle_in)
-# raw_feature_path = "../../ember_dataset/test_features.jsonl"
-# #retrain(model, scaler, raw_feature_path, int(0.2*8192))
+pickle_in = open("../../ember_dataset/scalers.pickle", "rb")
+scaler = pickle.load(pickle_in)
+raw_feature_path = "../../ember_dataset/test_features.jsonl"
+#retrain(model, scaler, raw_feature_path, int(0.2*8192))
 
-# actual_labels = []
-# with open(raw_feature_path, "r") as infile:
-#     for line_num, line in enumerate(infile):
-#         jsonline = json.loads(line)
-#         label = jsonline["label"]
-#         actual_labels.append(label)
+actual_labels = []
+with open(raw_feature_path, "r") as infile:
+    for line_num, line in enumerate(infile):
+        jsonline = json.loads(line)
+        label = jsonline["label"]
+        actual_labels.append(label)
 
-# score = score(model, scaler, raw_feature_path, actual_labels)
-# print("Original model TPR: ", score)
+score = score(model, scaler, raw_feature_path, actual_labels)
+print("Original model TPR: ", score)
 
-# retrained_score = score(retrained_model, scaler, raw_feature_path, actual_labels)
-# print("Retrained model TPR: ", retrained_score)
+retrained_score = score(retrained_model, scaler, raw_feature_path, actual_labels)
+print("Retrained model TPR: ", retrained_score)
