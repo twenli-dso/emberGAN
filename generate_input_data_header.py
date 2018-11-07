@@ -113,8 +113,8 @@ def generate_input_data(jsonl_dir, n, output_filepath):
         for target_feature in target_features:
             if target_feature not in all_target_features:
                 all_target_features.append(target_feature)
-                if len(all_target_features) >= 2000:
-                    break
+                #if len(all_target_features) >= 2000:
+                    #break
 
     n_samples = len(target_features_list)
     n_features = len(all_target_features)
@@ -170,7 +170,6 @@ def generate_input_data(jsonl_dir, n, output_filepath):
 
     print("xmal.shape:", xmal.shape)
     print("ymal.shape:", ymal.shape)
-    print("xmal[0]:",xmal[0])
     return (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels)
 
 #jsonl_dir = "./samples"
