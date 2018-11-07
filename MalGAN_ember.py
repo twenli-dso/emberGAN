@@ -39,7 +39,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 8192
+        self.blackbox_num_samples = 200000
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -440,9 +440,9 @@ class MalGAN():
 if __name__ == '__main__':
     blackbox = 'ember'
 
-    original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
-    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
-    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
+    original_feat_filepath = "./feature_dicts/original_features_dict_%s_200k.json" % (blackbox)
+    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s_200k.json" % (blackbox)
+    added_feat_filepath = "./feature_dicts/added_features_dict_%s_200k.json" % (blackbox)
 
     malgan = MalGAN()
     malgan.train(epochs=50, batch_size=64)

@@ -116,13 +116,17 @@ def generate_input_data(jsonl_dir, n, output_filepath):
                 #if len(all_target_features) >= 2000:
                     #break
 
+    #count all target features and select top 2000 frequent features
+    selected_target_features_counts = dict(Counter(all_target_features).most_common(3000))
+    selected_target_features = selected_target_features_counts.keys()
+
     n_samples = len(target_features_list)
-    n_features = len(all_target_features)
+    n_features = len(selected_target_features)
     #print("n_features: ", n_features)
     #n_features = 2000
     loc = {}
     for i in range(n_features):
-        loc[all_target_features[i]] = i
+        loc[selected_target_features[i]] = i
 
     x = np.zeros((n_samples, n_features))
     y = np.zeros((n_samples, ))
@@ -136,13 +140,13 @@ def generate_input_data(jsonl_dir, n, output_filepath):
         if cls == 'malware':
             y[i] = 1
         for target_feature in target_features:
-            if target_feature in all_target_features:
+            if target_feature in selected_target_features:
                 x[i, loc[target_feature]] = 1
 
         sha256_names.append(target_features_dict['name'])
     sha256_names = np.array(sha256_names)
 
-    feat_labels = all_target_features   #特征列名
+    feat_labels = selected_target_features   #特征列名
     forest = RandomForestClassifier(n_estimators=2000, random_state=0, n_jobs=-1)  #2000棵树,并行工作数是运行服务器决定
     forest.fit(x, y)
     importances = forest.feature_importances_   #feature_importances_特征列重要性占比
