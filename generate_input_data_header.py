@@ -95,7 +95,7 @@ def get_target_features(jsonl_dir):
                 target_features_dict['target_features'] = target_features
 
                 target_features_list.append(target_features_dict)
-    print("target_features_list: ", target_features_list[0])
+    #print("target_features_list: ", target_features_list[0])
     return target_features_list
 
 #TODO: make test_features.jsonl a global variable
