@@ -222,8 +222,8 @@ class MalGAN():
                             jsonline['header']['coff']['characteristics'] = header_chars
 
                         jsonAdverArray.append(jsonline)
-
-        print("jsonAdverArray[:2]:",jsonAdverArray[:2])
+        print("len(gen_examples):",len(gen_examples))
+        print("len(jsonAdverArray):",len(jsonAdverArray))
 
         with open(self.bl_adver_mal_filepath, 'w') as outfile:
             for jsonline in jsonAdverArray:
