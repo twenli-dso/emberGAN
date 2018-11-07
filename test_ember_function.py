@@ -1,6 +1,9 @@
 import os
+import tensorflow as tf
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.75)
+sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
 import ember
 from keras.models import load_model
