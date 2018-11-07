@@ -221,7 +221,7 @@ class MalGAN():
                             header_chars.append(feature)
                             jsonline['header']['coff']['characteristics'] = header_chars
 
-                        jsonAdverArray.append(jsonline)
+                    jsonAdverArray.append(jsonline)
         print("len(gen_examples):",len(gen_examples))
         print("len(jsonAdverArray):",len(jsonAdverArray))
 

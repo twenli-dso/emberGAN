@@ -20,7 +20,6 @@ def predict(model, scaler, raw_feature_path, num_samples):
     X_path = "X_test_2.dat"
     y_path = "y_test_2.dat"
 
-    print("num_samples:",num_samples)
     ember.vectorize_subset(X_path, y_path, [raw_feature_path], num_samples)
 
     #load X and y from .dat files
