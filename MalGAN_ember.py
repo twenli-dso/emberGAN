@@ -19,7 +19,7 @@ import pickle
 #from VOTEClassifier import VOTEClassifier
 
 import test_ember_function
-import generate_input_data
+import generate_input_data_header
 import api_module_mapping
 
 original_feat_filepath = ""
@@ -106,7 +106,7 @@ class MalGAN():
 
     def load_data(self):
         
-        return generate_input_data.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
@@ -157,7 +157,6 @@ class MalGAN():
         # print("bl_xtest_mal size:",len(bl_xtest_mal))
 
     def generate_adversarial_blackbox_data(self, gen_examples, orig_mal, mal_names, feat_labels):
-        # TODO: Append added features to blackbox data
         #Extract added features
         new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
         added_features = np.subtract(new_examples, orig_mal)
@@ -176,13 +175,15 @@ class MalGAN():
 
         #load api to module mapping or generate it if doesn't exist
         ####TODO: MAKE FILEPATH VARIABLE####
-        
+        '''
         try:
             with open("./api_module_mapping/api_module_mapping_%s.json" % (self.blackbox_num_samples), "r") as infile:
                 api_module_dict = json.load(infile)
         except FileNotFoundError:
                 api_module_dict = api_module_mapping.gen_api_module_mapping(self.blackbox_num_samples)
+        '''
 
+        #Append added features into original json file
         with open(self.mal_samples_filepath, 'r') as malfile:
             jsonAdverArray = []
             for line_num, line in enumerate(malfile):
@@ -190,16 +191,16 @@ class MalGAN():
                 name = jsonline['sha256']
                 if name in added_features_dict:
                     added_features = added_features_dict[name]
-                    imports = jsonline["imports"]
-                    if len(imports) > 0:
-                        '''
-                        #add new features to first import module
-                        first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
-                        first_module_imports.extend(added_features)
-                        imports[list(imports.keys())[0]] = first_module_imports
-                        '''
-                        #add new features to mapped module if exists, otherwise insert into first module
-                        for added_feature in added_features:
+
+                    #check if added feature belongs to imports or header characteristics
+                    for added_feature in added_features:
+                        category = added_feature.split(":")[0]
+                        feature = added_feature.split(":")[1]
+
+                        imports = jsonline["imports"]
+                        if category = "imports" and len(imports) > 0:
+                            '''
+                            #add new features to mapped module if exists, otherwise insert into first module
                             mapped_module = api_module_dict[added_feature]
                             
                             if mapped_module in imports:
@@ -207,15 +208,22 @@ class MalGAN():
                                 mapped_module_imports.append(added_feature)
                                 imports[mapped_module] = mapped_module_imports
                             else:
-                                #add to first module if mapped_module does not exist for this malfile
-                                first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
-                                first_module_imports.append(added_feature)
-                                imports[list(imports.keys())[0]] = first_module_imports
+                            '''
+                            #add to first module if mapped_module does not exist for this malfile
+                            first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
+                            first_module_imports.append(feature)
+                            imports[list(imports.keys())[0]] = first_module_imports
                         
-                        jsonline["imports"] = imports
+                            jsonline["imports"] = imports
+
+                        elif category = "chars":
+                            header_chars = jsonline['header']['coff']['characteristics']
+                            header_chars.append(feature)
+                            jsonline['header']['coff']['characteristics'] = header_chars
+
                         jsonAdverArray.append(jsonline)
 
-        #print("jsonAdverArray:",jsonAdverArray)
+        print("jsonAdverArray[:2]:",jsonAdverArray[:2])
 
         with open(self.bl_adver_mal_filepath, 'w') as outfile:
             for jsonline in jsonAdverArray:
