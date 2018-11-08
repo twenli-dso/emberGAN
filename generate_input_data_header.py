@@ -118,7 +118,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
 
     #count all target features and select top 2000 frequent features
     selected_target_features_counts = dict(Counter(all_target_features).most_common(3000))
-    selected_target_features = selected_target_features_counts.keys()
+    selected_target_features = list(selected_target_features_counts.keys())[0]
 
     n_samples = len(target_features_list)
     n_features = len(selected_target_features)
