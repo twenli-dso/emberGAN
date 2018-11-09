@@ -445,9 +445,9 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s_200k.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=1, batch_size=64)
-    # malgan.retrain_blackbox_detector(epochs=50, batch_size=2048)
-    # malgan.train(epochs=20, batch_size=2048)
+    malgan.train(epochs=50, batch_size=64)
+    malgan.retrain_blackbox_detector(epochs=50, batch_size=64)
+    malgan.train(epochs=20, batch_size=64)
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()
