@@ -26,7 +26,7 @@ original_ben_feat_filepath = ""
 added_feat_filepath = ""
 
 class MalGAN():
-    def __init__(self, blackbox='RF', same_train_data=1, filename='data_test_names.npz'):
+    def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_8192.npz'):
         self.apifeature_dims = 128
         self.z_dims = 20
         self.hide_layers = 256
@@ -104,8 +104,10 @@ class MalGAN():
         return substitute_detector
 
     def load_data(self):
-        
-        return generate_input_data.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        data = np.load(self.filename)
+        xmal, ymal, xben, yben, mal_names, ben_names, feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
+        return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
+        #return generate_input_data.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
@@ -164,6 +166,9 @@ class MalGAN():
         for added_feature in added_features:
             added_feature_labels = feat_labels[np.where(added_feature == 1)]
             added_features_labels.append(added_feature_labels)
+        print("new_examples[0]:",new_examples[0])
+        print("orig_mal[0]:",orig_mal[0])
+        print("added_features[0]:",added_features[0])
         
         #print("added_features_labels:",added_features_labels)
 
