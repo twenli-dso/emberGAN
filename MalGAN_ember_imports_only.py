@@ -166,9 +166,6 @@ class MalGAN():
         for added_feature in added_features:
             added_feature_labels = feat_labels[np.where(added_feature == 1)]
             added_features_labels.append(added_feature_labels)
-        print("new_examples[0]:",new_examples[0])
-        print("orig_mal[0]:",orig_mal[0])
-        print("added_features[0]:",added_features[0])
         
         #print("added_features_labels:",added_features_labels)
 
