@@ -191,7 +191,7 @@ class MalGAN():
                     added_features = added_features_dict[name]
                     imports = jsonline["imports"]
                     if len(imports) > 0:
-                        '''
+                        
                         #add new features to first import module
                         first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
                         first_module_imports.extend(added_features)
@@ -210,7 +210,7 @@ class MalGAN():
                                 first_module_imports = list(imports.values())[0]  #imports[list(imports.keys())[0]]
                                 first_module_imports.append(added_feature)
                                 imports[list(imports.keys())[0]] = first_module_imports
-                        
+                        '''
                         jsonline["imports"] = imports
                         jsonAdverArray.append(jsonline)
 
