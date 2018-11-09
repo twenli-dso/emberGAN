@@ -174,7 +174,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
 
     print("xmal.shape:", xmal.shape)
     print("ymal.shape:", ymal.shape)
-    return (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels)
+    return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
 
 #jsonl_dir = "./samples"
 #(xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = generate_input_data(jsonl_dir)
