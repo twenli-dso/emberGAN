@@ -186,4 +186,4 @@ def generate_input_data(jsonl_dir, n, output_filepath):
 #print("xben:",xben)
 
 # get_target_features("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192")
-generate_input_data("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192", 8192, "data_ember_target_features.npz")
+# generate_input_data("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192", 8192, "data_ember_target_features.npz")
