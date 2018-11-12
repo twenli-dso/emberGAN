@@ -39,7 +39,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 8192
+        self.blackbox_num_samples = 200000
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -49,7 +49,7 @@ class MalGAN():
         self.bl_xtest_mal_filepath = "./blackbox_data/bl_xtest_mal.jsonl"
         self.bl_xtrain_ben_filepath = "./blackbox_data/bl_xtrain_ben.jsonl"
         self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
-        self.bl_adver_mal_filepath = "./blackbox_data/adver_mal.jsonl"
+        self.bl_adver_mal_filepath = "./blackbox_data/adver_mal_200k.jsonl"
         
         #load scaler used for training ember
         data_dir = os.path.dirname(self.blackbox_modelpath)
@@ -452,9 +452,9 @@ class MalGAN():
 if __name__ == '__main__':
     blackbox = 'ember'
 
-    original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
-    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
-    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
+    original_feat_filepath = "./feature_dicts/original_features_dict_%s_200k.json" % (blackbox)
+    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s_200k.json" % (blackbox)
+    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json_200k" % (blackbox)
 
     malgan = MalGAN()
     malgan.train(epochs=50, batch_size=128)
