@@ -99,7 +99,7 @@ def get_target_features(jsonl_dir):
                 target_features_dict['target_features'] = target_features
 
                 target_features_list.append(target_features_dict)
-    print("target_features_list: ", target_features_list[0])
+    # print("target_features_list: ", target_features_list[0])
     return target_features_list
 
 #TODO: make test_features.jsonl a global variable
@@ -109,7 +109,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
         extract_n_samples(n, "../../ember_dataset/test_features.jsonl")
 
     target_features_list = get_target_features(jsonl_dir)
-    select_number = 128
+    select_number = 256
 
     all_target_features = []
     for target_features_dict in target_features_list:
@@ -176,8 +176,8 @@ def generate_input_data(jsonl_dir, n, output_filepath):
 
     np.savez(output_filepath, xmal=xmal, ymal=ymal, xben=xben, yben=yben, mal_names=mal_names, ben_names=ben_names, selected_feat_labels = selected_feat_labels)
 
-    print("xmal.shape:", xmal.shape)
-    print("ymal.shape:", ymal.shape)
+    # print("xmal.shape:", xmal.shape)
+    # print("ymal.shape:", ymal.shape)
     print("selected_feat_labels:",selected_feat_labels)
     return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
 
