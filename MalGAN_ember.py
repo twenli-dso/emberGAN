@@ -440,14 +440,14 @@ class MalGAN():
 if __name__ == '__main__':
     blackbox = 'ember'
 
-    original_feat_filepath = "./feature_dicts/original_features_dict_%s_200k.json" % (blackbox)
-    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s_200k.json" % (blackbox)
-    added_feat_filepath = "./feature_dicts/added_features_dict_%s_200k.json" % (blackbox)
+    original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
+    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
+    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
-    malgan.train(epochs=50, batch_size=64)
-    malgan.retrain_blackbox_detector(epochs=50, batch_size=64)
-    malgan.train(epochs=20, batch_size=64)
+    malgan.train(epochs=50, batch_size=128)
+    malgan.retrain_blackbox_detector(epochs=50, batch_size=128)
+    malgan.train(epochs=20, batch_size=128)
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()
