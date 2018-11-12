@@ -83,19 +83,23 @@ def get_target_features(jsonl_dir):
                 imports_flattened = ["imports:" + item for sublist in imports for item in sublist]
                 target_features.extend(imports_flattened)
 
-                #target_features_dict["apistats"] = imports_flattened
-
                 #retrieve header characteristics
                 header_chars = jsonline['header']['coff']['characteristics']
                 header_chars = ["chars:" + header_char for header_char in header_chars]
                 target_features.extend(header_chars)
 
-                #target_features_dict['header_chars'] = header_chars
+                #retrieve section props
+                sections = jsonline['section']['sections']
+                for section in sections:
+                    section_name = section['name']
+                    props = section['props']
+                    section_props = ["section_props:" + section_name + ":" + prop for prop in props]
+                    target_features.extend(section_props)
 
                 target_features_dict['target_features'] = target_features
 
                 target_features_list.append(target_features_dict)
-    #print("target_features_list: ", target_features_list[0])
+    print("target_features_list: ", target_features_list[0])
     return target_features_list
 
 #TODO: make test_features.jsonl a global variable
@@ -174,11 +178,12 @@ def generate_input_data(jsonl_dir, n, output_filepath):
 
     print("xmal.shape:", xmal.shape)
     print("ymal.shape:", ymal.shape)
+    print("selected_feat_labels:",selected_feat_labels)
     return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
 
 #jsonl_dir = "./samples"
 #(xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = generate_input_data(jsonl_dir)
 #print("xben:",xben)
 
-#get_target_features("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192")
-#generate_input_data("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192", 8192, "data_ember_target_features.npz")
+# get_target_features("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192")
+generate_input_data("C:/Users/TWenLi/Desktop/Ember GAN/samples_8192", 8192, "data_ember_target_features.npz")

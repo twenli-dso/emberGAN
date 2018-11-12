@@ -195,10 +195,10 @@ class MalGAN():
                     #check if added feature belongs to imports or header characteristics
                     for added_feature in added_features:
                         category = added_feature.split(":")[0]
-                        feature = added_feature.split(":")[1]
 
                         imports = jsonline["imports"]
                         if category == "imports" and len(imports) > 0:
+                            feature = added_feature.split(":")[1]
                             '''
                             #add new features to mapped module if exists, otherwise insert into first module
                             mapped_module = api_module_dict[added_feature]
@@ -217,9 +217,21 @@ class MalGAN():
                             jsonline["imports"] = imports
 
                         elif category == "chars":
+                            feature = added_feature.split(":")[1]
+
                             header_chars = jsonline['header']['coff']['characteristics']
                             header_chars.append(feature)
                             jsonline['header']['coff']['characteristics'] = header_chars
+
+                        elif category == "section_props":
+                            section_name = added_feature.split(":")[1]
+                            feature = added_feature.split(":")[2]
+
+                            sections = jsonline['section']['sections']
+                            for section in sections:
+                                if section['name'] == section_name:
+                                    section['props'].append(feature) 
+                            jsonline['section']['sections'] = sections
 
                     jsonAdverArray.append(jsonline)
 
