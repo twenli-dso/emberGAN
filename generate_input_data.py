@@ -94,7 +94,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
         extract_n_samples(n, "../../ember_dataset/test_features.jsonl")
 
     apistats_list = get_apistats(jsonl_dir)
-    select_number = 512
+    select_number = 1024
 
     apis = []
     for apistats_dict in apistats_list:
