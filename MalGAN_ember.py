@@ -28,7 +28,7 @@ added_feat_filepath = ""
 
 class MalGAN():
     def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_200000.npz'):
-        self.apifeature_dims = 512
+        self.apifeature_dims = 1024
         self.z_dims = 20
         self.hide_layers = 256
         self.generator_layers = [self.apifeature_dims+self.z_dims, self.hide_layers, self.apifeature_dims]
@@ -39,7 +39,7 @@ class MalGAN():
         self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 200000
+        self.blackbox_num_samples = 8192
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
@@ -105,12 +105,12 @@ class MalGAN():
         return substitute_detector
 
     def load_data(self):
-        if not os.path.exists(self.filename):
-            generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
-        data = np.load(self.filename)
-        xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
-        return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
-        # return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        # if not os.path.exists(self.filename):
+        #     generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        # data = np.load(self.filename)
+        # xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
+        # return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
+        return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
