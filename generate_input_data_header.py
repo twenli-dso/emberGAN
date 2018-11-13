@@ -62,6 +62,9 @@ def get_target_features(jsonl_dir):
         with open (filepath,"r") as infile:
             for line_num, line in enumerate(infile):
 
+                if line_num % 10000 == 0:
+                    print("processing line_num #", line_num)
+
                 target_features_dict = {}
                 target_features = []
 
@@ -99,6 +102,7 @@ def get_target_features(jsonl_dir):
                 target_features_dict['target_features'] = target_features
 
                 target_features_list.append(target_features_dict)
+
     # print("target_features_list: ", target_features_list[0])
     return target_features_list
 
@@ -136,7 +140,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
     y = np.zeros((n_samples, ))
     sha256_names = []
     for i in range(n_samples):
-        if i%1000 == 0:
+        if i%10000 == 0:
             print("processing sample #", i)
         target_features_dict = target_features_list[i]
         target_features = target_features_dict['target_features']
