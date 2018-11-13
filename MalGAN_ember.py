@@ -105,6 +105,8 @@ class MalGAN():
         return substitute_detector
 
     def load_data(self):
+        if not os.path.exists(self.filename):
+            generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
         data = np.load(self.filename)
         xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
         return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
