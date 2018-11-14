@@ -49,7 +49,7 @@ class MalGAN():
         self.bl_xtest_mal_filepath = "./blackbox_data/bl_xtest_mal.jsonl"
         self.bl_xtrain_ben_filepath = "./blackbox_data/bl_xtrain_ben.jsonl"
         self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
-        self.bl_adver_mal_filepath = "./blackbox_data/adver_mal_200k.jsonl"
+        self.bl_adver_mal_filepath = "./blackbox_data/adver_mal.jsonl"
         
         #load scaler used for training ember
         data_dir = os.path.dirname(self.blackbox_modelpath)
@@ -456,9 +456,9 @@ class MalGAN():
 if __name__ == '__main__':
     blackbox = 'ember'
 
-    original_feat_filepath = "./feature_dicts/original_features_dict_%s_200k.json" % (blackbox)
-    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s_200k.json" % (blackbox)
-    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json_200k" % (blackbox)
+    original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
+    original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
+    added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     malgan = MalGAN()
     malgan.train(epochs=50, batch_size=128)
