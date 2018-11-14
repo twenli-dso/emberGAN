@@ -27,7 +27,7 @@ added_feat_filepath = ""
 
 class MalGAN():
     def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_8192.npz'):
-        self.apifeature_dims = 1024
+        self.apifeature_dims = 512
         self.z_dims = 20
         self.hide_layers = 256
         self.generator_layers = [self.apifeature_dims+self.z_dims, self.hide_layers, self.apifeature_dims]
