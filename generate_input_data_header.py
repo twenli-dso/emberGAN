@@ -113,7 +113,7 @@ def generate_input_data(jsonl_dir, n, output_filepath):
         extract_n_samples(n, "../../ember_dataset/test_features.jsonl")
 
     target_features_list = get_target_features(jsonl_dir)
-    select_number = 1024
+    select_number = 512
 
     all_target_features = []
     for target_features_dict in target_features_list:
