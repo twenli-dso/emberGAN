@@ -81,11 +81,12 @@ def get_target_features(jsonl_dir):
                 target_features_dict["class"] = label
 
                 #retrieve api features
-                # imports = jsonline["imports"]
-                # imports = list(imports.values())
-                # imports_flattened = ["imports:" + item for sublist in imports for item in sublist]
-                # target_features.extend(imports_flattened)
+                imports = jsonline["imports"]
+                imports = list(imports.values())
+                imports_flattened = ["imports:" + item for sublist in imports for item in sublist]
+                target_features.extend(imports_flattened)
 
+                '''
                 #retrieve header characteristics
                 header_chars = jsonline['header']['coff']['characteristics']
                 header_chars = ["chars:" + header_char for header_char in header_chars]
@@ -98,6 +99,7 @@ def get_target_features(jsonl_dir):
                     props = section['props']
                     section_props = ["section_props:" + section_name + ":" + prop for prop in props]
                     target_features.extend(section_props)
+                '''
 
                 target_features_dict['target_features'] = target_features
 
