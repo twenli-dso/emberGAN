@@ -17,7 +17,7 @@ def extract_n_samples(n, start_index, emberfp):
     with open(emberfp, 'r') as emberfile:
         for line_num, line in enumerate(emberfile):
             if line_num >= start_index:
-                if counter < num_benign and line_num:
+                if counter < num_benign:
                     jsonline = json.loads(line)
                     label = jsonline["label"]
 
