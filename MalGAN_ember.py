@@ -17,6 +17,7 @@ import numpy as np
 import json
 import pickle
 #from VOTEClassifier import VOTEClassifier
+import csv
 
 import test_ember_function
 import generate_input_data_header
@@ -25,6 +26,8 @@ import api_module_mapping
 original_feat_filepath = ""
 original_ben_feat_filepath = ""
 added_feat_filepath = ""
+iter_num = 0
+TPR_list = []
 
 class MalGAN():
     def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_200000.npz'):
@@ -110,7 +113,7 @@ class MalGAN():
         # data = np.load(self.filename)
         # xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
         # return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
-        return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples))
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
@@ -396,6 +399,8 @@ class MalGAN():
         # ------------------------------------------------------------------
 
         flag = ['DiffTrainData', 'SameTrainData']
+        TPR_list.append(Original_Test_TPR)
+        TPR_list.append(Test_TPR[-1])
         print('\n\n---{0} {1}'.format(self.blackbox, flag[self.same_train_data]))
         print('\nOriginal_Train_TPR: {0}, Adver_Train_TPR: {1}'.format(Original_Train_TPR, Train_TPR[-1]))
         print('\nOriginal_Test_TPR: {0}, Adver_Test_TPR: {1}'.format(Original_Test_TPR, Test_TPR[-1]))
@@ -452,6 +457,7 @@ class MalGAN():
         test_TPR = test_ember_function.score(retrained_ember, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
         print('\n---TPR after the black-box detector is retrained(Before Retraining MalGAN).')
         print('\nTrain_TPR: {0}, Test_TPR: {1}'.format(train_TPR, test_TPR))
+        TPR_list.append(test_TPR)
 
 if __name__ == '__main__':
     blackbox = 'ember'
@@ -460,10 +466,18 @@ if __name__ == '__main__':
     original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
-    malgan = MalGAN()
-    malgan.train(epochs=50, batch_size=128)
-    malgan.retrain_blackbox_detector(epochs=50, batch_size=128)
-    malgan.train(epochs=20, batch_size=128)
+    with open("compiled_results.csv","w") as csvfile:
+        for i in range(10):
+            iter_num = i
+            malgan = MalGAN()
+            malgan.train(epochs=50, batch_size=128)
+            malgan.retrain_blackbox_detector(epochs=50, batch_size=128)
+            malgan.train(epochs=20, batch_size=128)
+
+            csv_writer = csv.writer(csvfile, delimiter = ',')
+            csv_writer.writerow(TPR_list)
+            TPR_list = []
+
     '''
     for i in range(10):
         malgan.retrain_blackbox_detector()
