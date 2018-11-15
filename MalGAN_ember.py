@@ -469,6 +469,7 @@ if __name__ == '__main__':
     with open("compiled_results.csv","w") as csvfile:
         for i in range(10):
             iter_num = i
+            print("----------------RUNNING ITERATION #%s \n-----------------" %(iter_num))
             malgan = MalGAN()
             malgan.train(epochs=50, batch_size=128)
             malgan.retrain_blackbox_detector(epochs=50, batch_size=128)
