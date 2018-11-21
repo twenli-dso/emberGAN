@@ -30,7 +30,7 @@ iter_num = 0
 TPR_list = []
 
 class MalGAN():
-    def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_200000.npz'):
+    def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_8192.npz'):
         self.apifeature_dims = 512
         self.z_dims = 20
         self.hide_layers = 256
@@ -108,12 +108,12 @@ class MalGAN():
         return substitute_detector
 
     def load_data(self):
-        # if not os.path.exists(self.filename):
-        #     generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
-        # data = np.load(self.filename)
-        # xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
-        # return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
-        return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        if not os.path.exists(self.filename):
+            generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        data = np.load(self.filename)
+        xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
+        return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
+        #return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples))
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         #save bl_xtrain_mal etc into jsonl files
