@@ -30,14 +30,12 @@ iter_num = 0
 TPR_list = []
 
 class MalGAN():
-    def __init__(self, blackbox='RF', same_train_data=1, filename='data_ember_8192.npz'):
+    def __init__(self, filename='data_ember_8192.npz'):
         self.apifeature_dims = 512
         self.z_dims = 20
         self.hide_layers = 256
         self.generator_layers = [self.apifeature_dims+self.z_dims, self.hide_layers, self.apifeature_dims]
         self.substitute_detector_layers = [self.apifeature_dims, self.hide_layers, 1]
-        self.blackbox = blackbox       # RF LR DT SVM MLP VOTE
-        self.same_train_data = same_train_data   # MalGAN and the black-boxdetector are trained on same or different training sets
         optimizer = Adam(lr=0.001)
         self.filename = filename
 
@@ -54,7 +52,7 @@ class MalGAN():
         self.bl_xtest_ben_filepath = "./blackbox_data/bl_xtest_ben.jsonl"
         self.bl_adver_mal_filepath = "./blackbox_data/adver_mal.jsonl"
         
-        #load scaler used for training ember
+        # Load scaler used for training ember
         data_dir = os.path.dirname(self.blackbox_modelpath)
         pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
         self.scaler = pickle.load(pickle_in)
@@ -401,23 +399,12 @@ class MalGAN():
         flag = ['DiffTrainData', 'SameTrainData']
         TPR_list.append(Original_Test_TPR)
         TPR_list.append(Test_TPR[-1])
-        print('\n\n---{0} {1}'.format(self.blackbox, flag[self.same_train_data]))
         print('\nOriginal_Train_TPR: {0}, Adver_Train_TPR: {1}'.format(Original_Train_TPR, Train_TPR[-1]))
         print('\nOriginal_Test_TPR: {0}, Adver_Test_TPR: {1}'.format(Original_Test_TPR, Test_TPR[-1]))
         print('\nFirst 10 Test_TPR:',Test_TPR[1:10])
         print('\nLast 10 Test_TPR:',Test_TPR[-10:-1])
         #print('np.ones(gen_examples.shape) * (gen_examples > 0.5):',np.ones(gen_examples.shape) * (gen_examples > 0.5))
-        # Plot TPR
-        '''
-        plt.figure()
-        plt.plot(range(len(Train_TPR)), Train_TPR, c='r', label='Training Set', linewidth=2)
-        plt.plot(range(len(Test_TPR)), Test_TPR, c='g', linestyle='--', label='Validation Set', linewidth=2)
-        plt.xlabel('Epoch')
-        plt.ylabel('TPR')
-        plt.legend()
-        plt.savefig('saves/Epoch_TPR({0}, {1}).png'.format(self.blackbox, flag[self.same_train_data]))
-        plt.show()
-        '''
+        
 
     def retrain_blackbox_detector(self, epochs, batch_size):
         # Load and Split the dataset
