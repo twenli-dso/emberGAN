@@ -30,22 +30,23 @@ iter_num = 0
 TPR_list = []
 
 class MalGAN():
-    def __init__(self, filename='data_ember_8192.npz'):
+    def __init__(self, num_samples=8192):
         self.apifeature_dims = 512
         self.z_dims = 20
         self.hide_layers = 256
         self.generator_layers = [self.apifeature_dims+self.z_dims, self.hide_layers, self.apifeature_dims]
         self.substitute_detector_layers = [self.apifeature_dims, self.hide_layers, 1]
         optimizer = Adam(lr=0.001)
-        self.filename = filename
 
         # Directories and filepaths for blackbox data
-        self.blackbox_num_samples = 8192
+        self.blackbox_num_samples = num_samples
+        self.data_filepath = 'data_ember_%s.npz' % (num_samples)
         self.jsonl_dir = "./samples_%s/" % (self.blackbox_num_samples)
         self.mal_samples_filepath = "%smalware_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.8))
         self.ben_samples_filepath = "%sbenign_samples_%s.jsonl" % (self.jsonl_dir, int(self.blackbox_num_samples * 0.2))
         self.blackbox_modelpath = "../../ember_dataset/model.h5"
         self.blackbox_model = load_model(self.blackbox_modelpath)
+        self.ember_filepath = "../../ember_dataset/test_features.jsonl"
         self.bl_xtrain_mal_filepath = "./blackbox_data/bl_xtrain_mal.jsonl"
         self.bl_xtest_mal_filepath = "./blackbox_data/bl_xtest_mal.jsonl"
         self.bl_xtrain_ben_filepath = "./blackbox_data/bl_xtrain_ben.jsonl"
@@ -106,16 +107,17 @@ class MalGAN():
         return substitute_detector
 
     def load_data(self):
-        if not os.path.exists(self.filename):
-            generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, 'data_ember_%s.npz' % (self.blackbox_num_samples))
-        data = np.load(self.filename)
+        """ Generates or reads data used for training and testing of GAN"""
+        if not os.path.exists(self.data_filepath):
+            generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, self.data_filepath, self.ember_filepath)
+        data = np.load(self.data_filepath)
         xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
         return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
-        #return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples))
+        #return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples), self.ember_filepath)
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
-        #save bl_xtrain_mal etc into jsonl files
-        #same_train_data, is_first?
+        # Save bl_xtrain_mal etc into jsonl files
+
         with open(self.mal_samples_filepath, 'r') as malfile:
             bl_xtrain_mal = []
             bl_xtest_mal = []
@@ -188,7 +190,7 @@ class MalGAN():
                 api_module_dict = api_module_mapping.gen_api_module_mapping(self.blackbox_num_samples)
         '''
 
-        #Append added features into original json file
+        # Append added features into original json file
         with open(self.mal_samples_filepath, 'r') as malfile:
             jsonAdverArray = []
             for line_num, line in enumerate(malfile):
@@ -453,8 +455,8 @@ if __name__ == '__main__':
     original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
-    with open("compiled_results.csv","w") as csvfile:
-        for i in range(10):
+    for i in range(10):
+        with open("compiled_results_test.csv","a") as csvfile:
             iter_num = i
             print("----------------RUNNING ITERATION #%s-----------------\n" %(iter_num))
             malgan = MalGAN()
