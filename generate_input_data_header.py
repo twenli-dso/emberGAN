@@ -1,10 +1,19 @@
-import json, glob, os
+rimport json, glob, os
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from collections import Counter
 
-# Extract samples from original jsonl feature file from ember into samples_n directory, split into malware and benign jsonl files.
+
 def extract_n_samples(n, start_index, emberfp):
+    """ Extract samples from original jsonl feature file from ember dataset into samples_n directory,
+    Samples are split into two separate jsonl files for malware and benign samples
+
+    Parameters:
+        n (int): Number of samples to extract
+        start_index (int): Line number to start extracting from
+        emberfp (str): Filepath of original jsonl feature file from ember dataset
+    """
+
     #create samples_n directory if doesn't exist
     samples_dir = "./samples_%s" % (n)
     os.makedirs(samples_dir, exist_ok=True)
@@ -55,6 +64,14 @@ def extract_n_samples(n, start_index, emberfp):
             outfile.write('\n')
 
 def get_target_features(jsonl_dir):
+    """ Extract targetted features from jsonl files in directory
+
+    Parameters:
+        jsonl_dir (str): Filepath of directory with samples to be used for training and testing
+
+    Returns:
+        target_features_list: list of dictionaries with name of malware and its targetted features
+    """
     filepaths = glob.glob(os.path.join(jsonl_dir, '*.jsonl'))
 
     target_features_list = []
@@ -111,11 +128,27 @@ def get_target_features(jsonl_dir):
     return target_features_list
 
 #TODO: make test_features.jsonl a global variable
-def generate_input_data(jsonl_dir, n, iter_num, output_filepath):
+def generate_input_data(jsonl_dir, n, iter_num, output_filepath, ember_filepath):
+    """Generate data for training and testing of GAN
+
+    Parameters:
+        jsonl_dir (str): Filepath of directory with samples to be used for training and testing
+        n (int): Number of samples to extract from original ember dataset
+        iter_num (int): Current iteration number
+        output_filepath (str): Filepath of npz file for saving the generated input data
+        ember_filepath (str): Filepath of jsonl file provided in ember dataset
+    
+    Returns: 
+        xmal, ymal: X and y for malicious samples
+        xben, yben: X and y for benign samples
+        mal_names, ben_names: Names (sha256) of malicious and benign samples
+        selected_feat_labels: Names of features that were selected 
+
+    """
     #extract samples if samples dir doesn't exist
     #if not os.path.exists(jsonl_dir):
     start_index = iter_num * 8192
-    extract_n_samples(n, start_index, "../../ember_dataset/test_features.jsonl")
+    extract_n_samples(n, start_index, ember_filepath)
 
     target_features_list = get_target_features(jsonl_dir)
     select_number = 512
@@ -126,17 +159,13 @@ def generate_input_data(jsonl_dir, n, iter_num, output_filepath):
         for target_feature in target_features:
             if target_feature not in all_target_features:
                 all_target_features.append(target_feature)
-                #if len(all_target_features) >= 2000:
-                    #break
 
-    #count all target features and select top 2000 frequent features
+    #count all target features and select top 3000 frequent features
     selected_target_features_counts = dict(Counter(all_target_features).most_common(3000))
     selected_target_features = list(selected_target_features_counts.keys())
 
     n_samples = len(target_features_list)
     n_features = len(selected_target_features)
-    #print("n_features: ", n_features)
-    #n_features = 2000
     loc = {}
     for i in range(n_features):
         loc[selected_target_features[i]] = i
@@ -164,30 +193,23 @@ def generate_input_data(jsonl_dir, n, iter_num, output_filepath):
     forest.fit(x, y)
     importances = forest.feature_importances_   #feature_importances_特征列重要性占比
     indices = np.argsort(importances)[::-1]     #对参数从小到大排序的索引序号取逆,即最重要特征索引——>最不重要特征索引
-    # for f in range(x.shape[1]):
-    #     print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
 
     #get selected feat_labels from selected indices
     feat_labels = np.array(feat_labels)
     selected_feat_labels = feat_labels[indices[:select_number]]
-    #print('selected_feat_labels:',selected_feat_labels)
 
     x = x[:, indices[:select_number]]
     xmal = x[np.where(y==1)]
     ymal = y[np.where(y==1)]
     mal_names = sha256_names[np.where(y==1)]
-    #print("mal_names:",mal_names)
 
     xben = x[np.where(y==0)]
     yben = y[np.where(y==0)]
     ben_names = sha256_names[np.where(y==0)]
-    #print("ben_names:",ben_names)
 
     np.savez(output_filepath, xmal=xmal, ymal=ymal, xben=xben, yben=yben, mal_names=mal_names, ben_names=ben_names, selected_feat_labels = selected_feat_labels)
 
-    # print("xmal.shape:", xmal.shape)
-    # print("ymal.shape:", ymal.shape)
-    print("selected_feat_labels:",selected_feat_labels)
+    #print("selected_feat_labels:",selected_feat_labels)
     return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
 
 #jsonl_dir = "./samples"
