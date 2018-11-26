@@ -1,4 +1,4 @@
-rimport json, glob, os
+import json, glob, os
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from collections import Counter
