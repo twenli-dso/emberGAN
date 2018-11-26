@@ -109,6 +109,7 @@ class MalGAN():
     def load_data(self):
         """ Generates or reads data used for training and testing of GAN"""
         if not os.path.exists(self.data_filepath):
+            print("FILEPATH DOESN'T EXIST")
             generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, self.data_filepath, self.ember_filepath)
         data = np.load(self.data_filepath)
         xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
