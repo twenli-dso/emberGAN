@@ -58,11 +58,11 @@ def vectorize_subset(X_path, y_path, raw_feature_paths, nrows):
     del X, y
 
     # Distribute the vectorization work
-    pool = multiprocessing.Pool()
-    argument_iterator = ((irow, raw_features_string, X_path, y_path, nrows)
+    with multiprocessing.Pool() as pool:
+        argument_iterator = ((irow, raw_features_string, X_path, y_path, nrows)
                          for irow, raw_features_string in enumerate(raw_feature_iterator(raw_feature_paths)))
-    for _ in tqdm.tqdm(pool.imap_unordered(vectorize_unpack, argument_iterator), total=nrows):
-        pass
+        for _ in tqdm.tqdm(pool.imap_unordered(vectorize_unpack, argument_iterator), total=nrows):
+            pass
 
 
 def create_vectorized_features(data_dir):
@@ -218,21 +218,19 @@ def predict_sample(modelpath, file_data):
 
     return model.predict(sample)
 
-def predict_samplevector(modelpath, vector):
+def predict_samplevector(model, scaler_dict, vector):
     """
     Predict a PE file with a neural network model
     """
     embernet = EmberNet()
-    model = load_model(modelpath)
-    data_dir = os.path.dirname(modelpath)
 
     # Extract features from binary
     extractor = PEFeatureExtractor()
     feature_vector = np.array(vector, dtype=np.float32)
 
     # Retrieve scalers used on train set
-    pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
-    scaler_dict = pickle.load(pickle_in)
+    #pickle_in = open(os.path.join(data_dir, 'scalers.pickle'), 'rb')
+    #scaler_dict = pickle.load(pickle_in)
 
     #print("Before scaling")
     scaled_feature_vector = np.copy(feature_vector)
@@ -240,24 +238,56 @@ def predict_samplevector(modelpath, vector):
     #print(scaled_feature_vector.shape)
 
     # Scale each feature group using scalers fitted to train set
-    end = 4
-    scaled_feature_vector = scaled_feature_vector[:, :end]
+    end = 0
     for feature in extractor.features:
         scaler = scaler_dict[feature.name]
         start = end
         end += feature.dim
-        scaled_feature_vector[..., start:end] = scaler.transform(feature_vector[..., start:end].reshape(1, -1))
-
-        feature_matrix = scaled_feature_vector[:, start:end].as_matrix().astype(float)
-        scaled_group = scaler.transform(feature_matrix)
-        scaled_feature_vector = pd.concat([scaled_feature_vector, pd.DataFrame(scaled_group)], axis=1)
-
-    print("After scaling", scaled_feature_vector)
+        #print("len(feature_vector):",len(feature_vector))
+        for i in range(len(feature_vector)):
+            #print("(feature_vector[i][..., start:end].reshape(1,-1)).shape:",(feature_vector[i][..., start:end].reshape(1,-1)).shape)
+            scaled_feature_vector[i][..., start:end] = scaler.transform(feature_vector[i][..., start:end].reshape(1, -1))
+    #print("After scaling", scaled_feature_vector)
     #print(scaled_feature_vector.shape)
 
     sample = embernet.separate_by_feature(scaled_feature_vector)
 
     return model.predict(sample)
+
+def retrain_model(model, scaler_dict, X, y, epochs, batch_size):
+    """
+    Predict a PE file with a neural network model
+    """
+    embernet = EmberNet()
+
+    # Extract features from binary
+    extractor = PEFeatureExtractor()
+    feature_vector = np.array(X, dtype=np.float32)
+
+    #print("Before scaling")
+    scaled_feature_vector = np.copy(feature_vector)
+    #print(scaled_feature_vector)
+    #print(scaled_feature_vector.shape)
+
+    # Scale each feature group using scalers fitted to train set
+    end = 0
+    for feature in extractor.features:
+        scaler = scaler_dict[feature.name]
+        start = end
+        end += feature.dim
+        #print("len(feature_vector):",len(feature_vector))
+        for i in range(len(feature_vector)):
+            #print("(feature_vector[i][..., start:end].reshape(1,-1)).shape:",(feature_vector[i][..., start:end].reshape(1,-1)).shape)
+            scaled_feature_vector[i][..., start:end] = scaler.transform(feature_vector[i][..., start:end].reshape(1, -1))
+
+    #print("After scaling", scaled_feature_vector)
+    #print(scaled_feature_vector.shape)
+
+    X_by_feature = embernet.separate_by_feature(scaled_feature_vector)
+
+    model.fit(X_by_feature, y, validation_split=1.0/3, epochs=epochs, batch_size=batch_size, verbose=1)
+
+    return model
 
 def scale_features(data_dir):
     """
