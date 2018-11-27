@@ -8,15 +8,10 @@ from keras.models import Model
 from keras.optimizers import Adam
 from keras.models import load_model
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn import linear_model, svm, tree
 from sklearn.model_selection import train_test_split
-#import matplotlib.pyplot as plt
 import numpy as np
 import json
 import pickle
-#from VOTEClassifier import VOTEClassifier
 import csv
 
 import test_ember_functions
@@ -194,7 +189,7 @@ class MalGAN():
                 if name in added_features_dict:
                     added_features = added_features_dict[name]
 
-                    #check if added feature belongs to imports or header characteristics
+                    #check if added feature belongs to imports or header characteristics or section properties
                     for added_feature in added_features:
                         category = added_feature.split(":")[0]
 
@@ -439,6 +434,7 @@ class MalGAN():
 if __name__ == '__main__':
     blackbox = 'ember'
 
+    # Filepaths for saving original and generated features
     original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
     original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
