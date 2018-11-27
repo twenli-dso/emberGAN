@@ -159,11 +159,6 @@ class MalGAN():
                 json.dump(jsonline, outfile)
                 outfile.write('\n')
 
-        # print("bl_xtrain_mal:",bl_xtrain_mal)
-        # print("bl_xtest_mal:",bl_xtest_mal)
-        # print("bl_xtrain_mal size:",len(bl_xtrain_mal))
-        # print("bl_xtest_mal size:",len(bl_xtest_mal))
-
     def generate_adversarial_blackbox_data(self, gen_examples, orig_mal, mal_names, feat_labels):
         #Extract added features
         new_examples = np.ones(gen_examples.shape)*(gen_examples > 0.5)
@@ -181,9 +176,8 @@ class MalGAN():
 
         #print("added_features_dict:",added_features_dict)
 
-        #load api to module mapping or generate it if doesn't exist
-        ####TODO: MAKE FILEPATH VARIABLE####
         '''
+        #load api to module mapping or generate it if doesn't exist
         try:
             with open("./api_module_mapping/api_module_mapping_%s.json" % (self.blackbox_num_samples), "r") as infile:
                 api_module_dict = json.load(infile)
@@ -252,8 +246,8 @@ class MalGAN():
 
         # Load and Split the dataset
         (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
-        print("xmal shape:",xmal.shape)
-        print("xben shape:",xben.shape)
+        # print("xmal shape:",xmal.shape)
+        # print("xben shape:",xben.shape)
         mal_indices = np.arange(xmal.shape[0])
         ben_indices = np.arange(xben.shape[0])
 
@@ -299,15 +293,12 @@ class MalGAN():
                 self.generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
                 ymal_batch = test_ember_functions.predict(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xmal_batch))
-                #print("ymal_batch:",ymal_batch)
 
                 # Train the substitute_detector
                 d_loss_real = self.substitute_detector.train_on_batch(gen_examples, ymal_batch) 
                 d_loss_fake = self.substitute_detector.train_on_batch(xben_batch, yben_batch)
                 d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
-                # print("d_loss_real:",d_loss_real)
-                # print("d_loss_fake:",d_loss_fake)
-                # print("d_loss:", d_loss)
+                
                 # ---------------------
                 #  Train Generator
                 # ---------------------
@@ -326,7 +317,6 @@ class MalGAN():
             self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
             TPR = test_ember_functions.score(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
             print("Train_TPR:",TPR)
-            #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytrain_mal)
             Train_TPR.append(TPR)
 
             # Compute Test TPR
@@ -334,7 +324,6 @@ class MalGAN():
             gen_examples = self.generator.predict([xtest_mal, noise])
             self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
             TPR = test_ember_functions.score(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
-            #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytest_mal)
             print("Test_TPR:",TPR)
             Test_TPR.append(TPR)
 
@@ -348,8 +337,6 @@ class MalGAN():
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
                 with open("./MalGAN_ember_mapped_%s.txt" % (self.blackbox_num_samples) , "a") as outfile:
                     outfile.write("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]\n" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
-                # proc = psutil.Process()
-                # print ("open_files:",proc.open_files())
 
         # -------------------------------------------------------------------------
         #  Save added features and original features 
@@ -473,9 +460,3 @@ if __name__ == '__main__':
             csv_writer = csv.writer(csvfile, delimiter = ',')
             csv_writer.writerow(TPR_list)
             TPR_list = []
-
-    '''
-    for i in range(10):
-        malgan.retrain_blackbox_detector()
-        malgan.train(epochs=100, batch_size=64, is_first=False)
-    '''

@@ -36,7 +36,6 @@ def predict(model, scaler, raw_feature_path, num_samples):
 
     #load X and y from .dat files
     ndim = PEFeatureExtractor.dim
-    #print(X_path)
     X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
     
@@ -60,9 +59,6 @@ def score(model, scaler, raw_feature_path, actual_labels):
 
     num_samples = len(actual_labels)
     predicted_labels = predict(model, scaler, raw_feature_path, len(actual_labels))
-    # diff = np.subtract(predicted_labels, actual_labels)
-    # num_wrong = np.count_nonzero(diff)
-    # TPR = (num_samples - num_wrong) / num_samples
     
     actual_labels = np.array(actual_labels)
     predicted_labels = np.array(predicted_labels)
@@ -73,8 +69,7 @@ def score(model, scaler, raw_feature_path, actual_labels):
     diff = np.subtract(mal_labels, pred_labels_for_mal)
     false_negatives = np.count_nonzero(diff)
     total_positives = len(mal_pos[0])
-    # print("false_negatives: ", false_negatives)
-    # print("total_positives: ", total_positives)
+    
     TPR = (total_positives - false_negatives) / total_positives
 
     return TPR
@@ -101,7 +96,6 @@ def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
 
     #load X and y from .dat files
     ndim = PEFeatureExtractor.dim
-    #print(X_path)
     X = np.memmap(X_path, dtype=np.float32, mode="r", shape=(num_samples, ndim))
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
     
