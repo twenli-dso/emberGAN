@@ -17,6 +17,18 @@ import os
 import pickle
 
 def predict(model, scaler, raw_feature_path, num_samples):
+    """ Get prediction of whether samples are malicious or benign
+
+    Parameters:
+        model: EmberNet model file
+        scaler: Pickle file with scaler used for training EmberNet
+        raw_feature_path: Filepath of samples
+        num_samples: Number of samples in file
+
+    Returns:
+        scores: List of predictions for each sample (0 for benign, 1 for malicious)
+    """
+
     X_path = "X_test_2.dat"
     y_path = "y_test_2.dat"
 
@@ -34,6 +46,18 @@ def predict(model, scaler, raw_feature_path, num_samples):
 
 
 def score(model, scaler, raw_feature_path, actual_labels):
+    """ Calculate TPR of model with provided samples
+
+    Parameters:
+        model: EmberNet model file
+        scaler: Pickle file with scaler used for training EmberNet
+        raw_feature_path: Filepath of samples
+        actual_labels: Actual label of each sample (0 for benign, 1 for malicious)
+
+    Returns:
+        TPR (float): True Positive Rate of EmberNet based on provided samples
+    """
+
     num_samples = len(actual_labels)
     predicted_labels = predict(model, scaler, raw_feature_path, len(actual_labels))
     # diff = np.subtract(predicted_labels, actual_labels)
@@ -56,6 +80,20 @@ def score(model, scaler, raw_feature_path, actual_labels):
     return TPR
 
 def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
+    """ Retrain model with new samples
+
+    Parameters:
+        model: EmberNet model file
+        scaler: Pickle file with scaler used for training EmberNet
+        raw_feature_path: Filepath of samples
+        num_samples: Number of samples in file
+        epochs: Number of training epochs 
+        batch_size: Batch size for training
+
+    Returns:
+        retrained_model: Model that has been retrained with new samples
+    """
+
     X_path = "X_test_retrain.dat"
     y_path = "y_test_retrain.dat"
 
@@ -72,23 +110,3 @@ def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
 
     return retrained_model
 
-# model = load_model("./blackbox_data/adver/model.h5")
-# retrained_model = load_model("./blackbox_data/adver/retrained_model.h5")
-
-# pickle_in = open("../../ember_dataset/scalers.pickle", "rb")
-# scaler = pickle.load(pickle_in)
-# raw_feature_path = "../../ember_dataset/test_features.jsonl"
-# #retrain(model, scaler, raw_feature_path, int(0.2*8192))
-
-# actual_labels = []
-# with open(raw_feature_path, "r") as infile:
-#     for line_num, line in enumerate(infile):
-#         jsonline = json.loads(line)
-#         label = jsonline["label"]
-#         actual_labels.append(label)
-
-# tpr = score(model, scaler, raw_feature_path, actual_labels)
-# print("Original model TPR: ", tpr)
-
-# retrained_tpr = score(retrained_model, scaler, raw_feature_path, actual_labels)
-# print("Retrained model TPR: ", retrained_tpr)

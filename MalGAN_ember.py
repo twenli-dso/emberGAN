@@ -20,7 +20,7 @@ import pickle
 import csv
 
 import test_ember_function
-import generate_input_data_header
+import generate_input_data
 import api_module_mapping
 
 original_feat_filepath = ""
@@ -109,12 +109,12 @@ class MalGAN():
     def load_data(self):
         """ Generates or reads data used for training and testing of GAN"""
         if not os.path.exists(self.data_filepath):
-            print("FILEPATH DOESN'T EXIST")
-            generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, self.data_filepath, self.ember_filepath)
+            print("Generating input data...")
+            generate_input_data.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, self.data_filepath, self.ember_filepath)
         data = np.load(self.data_filepath)
         xmal, ymal, xben, yben, mal_names, ben_names, selected_feat_labels = data['xmal'], data['ymal'], data['xben'], data['yben'], data['mal_names'], data['ben_names'], data['selected_feat_labels']
         return (xmal, ymal), (xben, yben), (mal_names, ben_names), (selected_feat_labels)
-        #return generate_input_data_header.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples), self.ember_filepath)
+        #return generate_input_data.generate_input_data(self.jsonl_dir, self.blackbox_num_samples, iter_num, 'data_ember_%s.npz' % (self.blackbox_num_samples), self.ember_filepath)
 
     def generate_blackbox_data(self, train_mal_indices, test_mal_indices, train_ben_indices, test_ben_indices):
         # Save bl_xtrain_mal etc into jsonl files
@@ -456,9 +456,8 @@ if __name__ == '__main__':
     original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
-    for i in range(10):
+    for iter_num in range(10):
         with open("compiled_results_test.csv","a") as csvfile:
-            iter_num = i
             print("----------------RUNNING ITERATION #%s-----------------\n" %(iter_num))
             malgan = MalGAN()
             malgan.train(epochs=50, batch_size=128)
