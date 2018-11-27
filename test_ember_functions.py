@@ -100,7 +100,7 @@ def retrain(model, scaler, raw_feature_path, num_samples, epochs, batch_size):
     y = np.memmap(y_path, dtype=np.float32, mode="r", shape=num_samples)
     
     retrained_model = ember.retrain_model(model, scaler, X, y, epochs, batch_size)
-    retrained_model.save("./blackbox_data/adver/retrained_model.h5")
+    retrained_model.save("./retrained_model.h5")
 
     return retrained_model
 

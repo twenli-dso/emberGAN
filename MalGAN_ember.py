@@ -241,8 +241,9 @@ class MalGAN():
 
         # Load and Split the dataset
         (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
-        # print("xmal shape:",xmal.shape)
-        # print("xben shape:",xben.shape)
+        print("xmal shape:",xmal.shape)
+        print("xben shape:",xben.shape)
+        
         mal_indices = np.arange(xmal.shape[0])
         ben_indices = np.arange(xben.shape[0])
 
