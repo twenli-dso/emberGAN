@@ -449,9 +449,9 @@ if __name__ == '__main__':
         with open("compiled_results_test.csv","a") as csvfile:
             print("----------------RUNNING ITERATION #%s-----------------\n" %(iter_num))
             malgan = MalGAN()
-            malgan.train(epochs=50, batch_size=128)
-            malgan.retrain_blackbox_detector(epochs=50, batch_size=128)
-            malgan.train(epochs=20, batch_size=128)
+            malgan.train(epochs=10, batch_size=128)
+            malgan.retrain_blackbox_detector(epochs=10, batch_size=128)
+            malgan.train(epochs=5, batch_size=128)
 
             csv_writer = csv.writer(csvfile, delimiter = ',')
             csv_writer.writerow(TPR_list)
