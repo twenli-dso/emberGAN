@@ -19,7 +19,7 @@ import pickle
 #from VOTEClassifier import VOTEClassifier
 import csv
 
-import test_ember_function
+import test_ember_functions
 import generate_input_data
 import api_module_mapping
 
@@ -270,9 +270,9 @@ class MalGAN():
         bl_ytrain_mal, bl_ytrain_ben, bl_ytest_mal, bl_ytest_ben = ytrain_mal, ytrain_ben, ytest_mal, ytest_ben
 
         # Calculate original TPR
-        ytrain_ben_blackbox = test_ember_function.predict(self.blackbox_model, self.scaler, self.bl_xtrain_ben_filepath, len(xtrain_ben))
-        Original_Train_TPR = test_ember_function.score(self.blackbox_model, self.scaler, self.bl_xtrain_mal_filepath, bl_ytrain_mal)
-        Original_Test_TPR = test_ember_function.score(self.blackbox_model, self.scaler, self.bl_xtest_mal_filepath, bl_ytest_mal)
+        ytrain_ben_blackbox = test_ember_functions.predict(self.blackbox_model, self.scaler, self.bl_xtrain_ben_filepath, len(xtrain_ben))
+        Original_Train_TPR = test_ember_functions.score(self.blackbox_model, self.scaler, self.bl_xtrain_mal_filepath, bl_ytrain_mal)
+        Original_Test_TPR = test_ember_functions.score(self.blackbox_model, self.scaler, self.bl_xtest_mal_filepath, bl_ytest_mal)
         #print("ytrain_ben_blackbox:", ytrain_ben_blackbox)
         print("Original_Train_TPR:",Original_Train_TPR)
         print("Original_Test_TPR:",Original_Test_TPR)
@@ -298,7 +298,7 @@ class MalGAN():
                 gen_examples = self.generator.predict([xmal_batch, noise])
                 self.generate_adversarial_blackbox_data(gen_examples, xmal_batch, xmal_batch_names, feat_labels)
 
-                ymal_batch = test_ember_function.predict(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xmal_batch))
+                ymal_batch = test_ember_functions.predict(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xmal_batch))
                 #print("ymal_batch:",ymal_batch)
 
                 # Train the substitute_detector
@@ -324,7 +324,7 @@ class MalGAN():
             noise = np.random.uniform(0, 1, (xtrain_mal.shape[0], self.z_dims))
             gen_examples = self.generator.predict([xtrain_mal, noise])
             self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
-            TPR = test_ember_function.score(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
+            TPR = test_ember_functions.score(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
             print("Train_TPR:",TPR)
             #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytrain_mal)
             Train_TPR.append(TPR)
@@ -333,7 +333,7 @@ class MalGAN():
             noise = np.random.uniform(0, 1, (xtest_mal.shape[0], self.z_dims))
             gen_examples = self.generator.predict([xtest_mal, noise])
             self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
-            TPR = test_ember_function.score(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
+            TPR = test_ember_functions.score(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
             #TPR = self.blackbox_detector.score(np.ones(gen_examples.shape) * (gen_examples > 0.5), ytest_mal)
             print("Test_TPR:",TPR)
             Test_TPR.append(TPR)
@@ -435,16 +435,16 @@ class MalGAN():
         self.generate_adversarial_blackbox_data(gen_examples, xtrain_mal, train_mal_names, feat_labels)
 
         # Retrain ember with adversarial examples
-        retrained_ember = test_ember_function.retrain(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xtrain_mal), epochs, batch_size)
+        retrained_ember = test_ember_functions.retrain(self.blackbox_model, self.scaler, self.bl_adver_mal_filepath, len(xtrain_mal), epochs, batch_size)
 
         # Compute Train TPR
-        train_TPR = test_ember_function.score(retrained_ember, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
+        train_TPR = test_ember_functions.score(retrained_ember, self.scaler, self.bl_adver_mal_filepath, bl_ytrain_mal)
 
         # Compute Test TPR
         noise = np.random.uniform(0, 1, (xtest_mal.shape[0], self.z_dims))
         gen_examples = self.generator.predict([xtest_mal, noise])
         self.generate_adversarial_blackbox_data(gen_examples, xtest_mal, test_mal_names, feat_labels)
-        test_TPR = test_ember_function.score(retrained_ember, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
+        test_TPR = test_ember_functions.score(retrained_ember, self.scaler, self.bl_adver_mal_filepath, bl_ytest_mal)
         print('\n---TPR after the black-box detector is retrained(Before Retraining MalGAN).')
         print('\nTrain_TPR: {0}, Test_TPR: {1}'.format(train_TPR, test_TPR))
         TPR_list.append(test_TPR)
@@ -455,6 +455,12 @@ if __name__ == '__main__':
     original_feat_filepath = "./feature_dicts/original_features_dict_%s.json" % (blackbox)
     original_ben_feat_filepath = "./feature_dicts/original_ben_features_dict_%s.json" % (blackbox)
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
+
+    # Save results of ember into csv file
+    with open("compiled_results_test.csv","w") as csvfile:
+        headers = ["Original TPR",	"Adver TPR"	"Adver TPR After Retraining EmberNet", "Adver TPR After Retraining EmberNet 2", "Adver TPR After Retraining EmberGAN"]
+        csv_writer = csv.writer(csvfile, delimiter = ',')
+        csv_writer.writerow(headers)
 
     for iter_num in range(10):
         with open("compiled_results_test.csv","a") as csvfile:
