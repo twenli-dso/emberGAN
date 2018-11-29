@@ -441,13 +441,13 @@ if __name__ == '__main__':
     added_feat_filepath = "./feature_dicts/added_features_dict_%s.json" % (blackbox)
 
     # Save results of ember into csv file
-    with open("compiled_results_test.csv","w") as csvfile:
+    with open("compiled_results.csv","w") as csvfile:
         headers = ["Original TPR",	"Adver TPR", "Adver TPR After Retraining EmberNet", "Adver TPR After Retraining EmberNet 2", "Adver TPR After Retraining EmberGAN"]
         csv_writer = csv.writer(csvfile, delimiter = ',')
         csv_writer.writerow(headers)
 
     for iter_num in range(10):
-        with open("compiled_results_test.csv","a") as csvfile:
+        with open("compiled_results.csv","a") as csvfile:
             print("----------------RUNNING ITERATION #%s-----------------\n" %(iter_num))
             malgan = MalGAN()
             malgan.train(epochs=10, batch_size=128)
