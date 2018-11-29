@@ -243,7 +243,7 @@ class MalGAN():
         (xmal, ymal), (xben, yben), (mal_names, ben_names), (feat_labels) = self.load_data()
         print("xmal shape:",xmal.shape)
         print("xben shape:",xben.shape)
-        
+
         mal_indices = np.arange(xmal.shape[0])
         ben_indices = np.arange(xben.shape[0])
 
@@ -442,7 +442,7 @@ if __name__ == '__main__':
 
     # Save results of ember into csv file
     with open("compiled_results_test.csv","w") as csvfile:
-        headers = ["Original TPR",	"Adver TPR"	"Adver TPR After Retraining EmberNet", "Adver TPR After Retraining EmberNet 2", "Adver TPR After Retraining EmberGAN"]
+        headers = ["Original TPR",	"Adver TPR", "Adver TPR After Retraining EmberNet", "Adver TPR After Retraining EmberNet 2", "Adver TPR After Retraining EmberGAN"]
         csv_writer = csv.writer(csvfile, delimiter = ',')
         csv_writer.writerow(headers)
 
