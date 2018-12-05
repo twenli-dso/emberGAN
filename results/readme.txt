@@ -1,0 +1,1 @@
+compiled_results.csv contains results taken from running with 8192 samples, 50 training epochs for EmberGAN, 50 retraining epochs for EmberNet, then 10 epochs of retraining EmberGAN. The 8192 samples used were a different batch of samples across each run.

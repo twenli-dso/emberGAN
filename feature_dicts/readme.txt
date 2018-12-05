@@ -1,0 +1,1 @@
+This directory will store the original target features of the original malware, added target features to the original malware and the target features of benign software. This is to aid in analysis of what features are added by the GAN to fool the black-box detector.
